@@ -1,0 +1,826 @@
+{% extends "layout.html" %}
+
+{% block title %}Submission History - ILR Predictor{% endblock %}
+{% block header_title %}Submission History{% endblock %}
+{% block subtitle %}Review all analyzed texts and their predicted ILR levels{% endblock %}
+{% block nav_history %}active{% endblock %}
+
+{% block extra_head %}
+<style>
+    .filter-bar {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        padding: 20px 30px;
+        margin-bottom: 32px;
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .filter-group label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #4a5568;
+    }
+    .filter-bar input[type="text"], 
+    .filter-bar select {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        background-color: #f8fafc;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .filter-bar input[type="text"]:focus,
+    .filter-bar select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    .filter-bar button {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .filter-bar button.btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    .filter-bar button.btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
+    .filter-bar button.btn-secondary {
+        background-color: #e2e8f0;
+        color: #4a5568;
+        border: 1px solid #cbd5e0;
+    }
+    .filter-bar button.btn-secondary:hover {
+        background-color: #cbd5e0;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .grid-1 {
+        display: grid;
+        gap: 24px;
+    }
+
+    .history-card {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+
+    .history-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        background: #f1f5f9;
+    }
+
+    .features-detail {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px dashed #e2e8f0;
+        display: none; /* Hidden by default */
+    }
+
+    .features-detail.show {
+        display: block;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .feature-item {
+        background: #e0f2fe;
+        padding: 10px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 0.85rem;
+    }
+
+    .feature-item div:first-child {
+        color: #0369a1;
+        font-weight: 500;
+        margin-bottom: 4px;
+    }
+
+    .feature-item div:last-child {
+        font-weight: 700;
+        color: #0c4a6e;
+    }
+
+    .text-preview-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        background: #f8fafc;
+        padding: 16px;
+        border-radius: 12px;
+        border-left: 4px solid #667eea;
+        margin-bottom: 12px;
+        gap: 15px;
+    }
+    .text-preview-container em {
+        flex: 1;
+        min-width: 0;
+        color: #64748b;
+        line-height: 1.6;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    .show-full-btn {
+        flex-shrink: 0;
+        padding: 8px 12px;
+        border: 1px solid #667eea;
+        background-color: white;
+        color: #667eea;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .show-full-btn:hover {
+        background-color: #667eea;
+        color: white;
+    }
+
+    .translated-preview-container {
+        background: #f8fafc;
+        padding: 16px;
+        border-radius: 12px;
+        border-left: 4px solid #764ba2;
+        margin-top: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .translated-preview-container em {
+        flex: 1;
+        min-width: 0;
+        color: #6b7280;
+        line-height: 1.6;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+  
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    .modal-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        max-width: 800px;
+        max-height: 80vh;
+        width: 90%;
+        position: relative;
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+    .modal-overlay.show .modal-content {
+        transform: translateY(0);
+    }
+    .modal-close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #64748b;
+    }
+    .modal-close-btn:hover {
+        color: #374151;
+    }
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 20px;
+    }
+    .modal-text {
+        font-family: monospace;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        line-height: 1.6;
+        font-size: 1rem;
+        color: #374151;
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-right: 10px;
+        box-sizing: border-box;
+    }
+
+ 
+    .probability-chart-container {
+        margin-top: 15px;
+        height: 200px; 
+        width: 100%;
+    }
+  
+    .probability-chart-container canvas {
+        height: 100% !important; 
+        max-height: 100%; 
+        width: 100% !important; 
+    }
+  
+    .feature-radar-chart-container {
+        margin-top: 15px;
+        height: 200px; 
+        width: 100%;
+    }
+    .feature-radar-chart-container canvas {
+        height: 100% !important;
+        max-height: 100%;
+        width: 100% !important;
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <div class="section-title">
+        
+        Analysis History
+    </div>
+
+    <div class="filter-bar">
+        <div class="filter-group">
+            <label for="searchText">Search Text</label>
+            <input type="text" id="searchText" placeholder="Search in original text...">
+        </div>
+        <div class="filter-group">
+            <label for="ilrFilter">Filter by ILR Level</label>
+            <select id="ilrFilter">
+                <option value="">All Levels</option>
+                <option value="0">ILR 0 (No Proficiency)</option>
+                <option value="1">ILR 1 (Elementary)</option>
+                <option value="2">ILR 2 (Limited Working)</option>
+                <option value="3">ILR 3 (Professional Working)</option>
+                <option value="4">ILR 4 (Full Professional)</option>
+                <option value="5">ILR 5 (Native/Bilingual)</option>
+            </select>
+        </div>
+        <button class="btn btn-secondary" onclick="resetFilters()">Reset Filters</button>
+    </div>
+
+    <div id="historyLoading" class="text-center" style="padding: 60px 20px;">
+        <div style="font-size: 3rem; margin-bottom: 20px;">⏳</div>
+        <h3 style="color: #64748b; margin-bottom: 16px;">Loading your history...</h3>
+        <div class="spinner" style="width: 40px; height: 40px; border: 4px solid rgba(102, 126, 234, 0.2); border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+    </div>
+
+    <div id="historyContent" style="display: none;">
+        <div class="grid grid-1" id="historyGrid">
+            </div>
+        
+        <div class="text-center mt-4" id="loadMoreContainer">
+            <button class="btn" id="loadMoreBtn" style="display: none;">
+                ⬇Load More
+            </button>
+            <span id="noMoreHistory" style="display: none; color: #64748b;">No more history entries.</span>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/" class="btn">
+                Analyze New Text
+            </a>
+        </div>
+    </div>
+
+    <div id="historyEmpty" class="text-center" style="padding: 60px 20px; display: none;">
+        <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.3;">📊</div>
+        <h3 style="color: #64748b; margin-bottom: 16px;">No submission history found for these filters.</h3>
+        <p style="color: #9ca3af; margin-bottom: 32px;">Adjust your filters or analyze new texts.</p>
+        <button onclick="resetFilters()" class="btn">
+            Show All History
+        </button>
+    </div>
+
+    <div id="historyError" class="text-center" style="padding: 60px 20px; display: none;">
+        <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.3;">❌</div>
+        <h3 style="color: #ef4444; margin-bottom: 16px;">Error loading history</h3>
+        <p style="color: #9ca3af; margin-bottom: 32px;" id="errorMessage">Please try again later.</p>
+        <button onclick="loadHistory(true)" class="btn">
+            Retry
+        </button>
+    </div>
+</div>
+
+<div id="fullTextModal" class="modal-overlay" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close-btn" onclick="closeModal()">×</button>
+        <h3 class="modal-title" id="modalTitle"></h3>
+        <div class="modal-text" id="modalTextContent"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let currentOffset = 0;
+const limit = 20;
+let isLoading = false;
+let allHistoryLoaded = false;
+let totalHistoryCount = 0;
+
+let currentSearchQuery = '';
+let currentIlrLevel = ''; 
+
+const historyLoading = document.getElementById('historyLoading');
+const historyContent = document.getElementById('historyContent');
+const historyEmpty = document.getElementById('historyEmpty');
+const historyError = document.getElementById('historyError');
+const historyGrid = document.getElementById('historyGrid');
+const loadMoreBtn = document.getElementById('loadMoreBtn');
+const noMoreHistorySpan = document.getElementById('noMoreHistory');
+const errorMessageDiv = document.getElementById('errorMessage');
+const searchText = document.getElementById('searchText');
+const ilrFilter = document.getElementById('ilrFilter');
+
+const fullTextModal = document.getElementById('fullTextModal');
+const modalTitle = document.getElementById('modalTitle');
+const modalTextContent = document.getElementById('modalTextContent');
+
+const loadedRecords = {};
+
+
+function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), delay);
+    };
+}
+
+function showState(state) {
+    historyLoading.style.display = 'none';
+    historyContent.style.display = 'none';
+    historyEmpty.style.display = 'none';
+    historyError.style.display = 'none';
+
+    if (state === 'loading') {
+        historyLoading.style.display = 'block';
+    } else if (state === 'content') {
+        historyContent.style.display = 'block';
+    } else if (state === 'empty') {
+        historyEmpty.style.display = 'block';
+    } else if (state === 'error') {
+        historyError.style.display = 'block';
+    }
+}
+
+async function loadHistory(reset = false) {
+    if (isLoading) {
+        return;
+    }
+
+    if (reset) {
+        currentOffset = 0;
+        allHistoryLoaded = false;
+        historyGrid.innerHTML = '';
+        Object.keys(loadedRecords).forEach(key => delete loadedRecords[key]);
+        for (const cardId in historyCharts) {
+            if (historyCharts[cardId]) {
+                historyCharts[cardId].destroy();
+                delete historyCharts[cardId];
+            }
+        }
+        showState('loading');
+    } else if (allHistoryLoaded) {
+        return;
+    }
+
+    isLoading = true;
+    if (currentOffset === 0) {
+        showState('loading');
+    } else {
+        loadMoreBtn.disabled = true;
+        loadMoreBtn.innerHTML = '<span>🔄 Loading...</span>';
+    }
+
+    try {
+       
+        let url = `/api/history?limit=${limit}&offset=${currentOffset}`;
+        if (currentSearchQuery) {
+            url += `&search_query=${encodeURIComponent(currentSearchQuery)}`;
+        }
+        if (currentIlrLevel) {
+            url += `&ilr_level=${encodeURIComponent(currentIlrLevel)}`;
+        }
+
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || `HTTP ${response.status}: Failed to fetch history.`);
+        }
+        
+        const data = await response.json();
+        
+        totalHistoryCount = data.total_count;
+
+        if (data.history && data.history.length > 0) {
+            data.history.forEach(record => {
+                loadedRecords[record.id] = record;
+            });
+            appendHistory(data.history);
+            currentOffset += data.history.length;
+            
+            if (currentOffset >= totalHistoryCount) {
+                allHistoryLoaded = true;
+                loadMoreBtn.style.display = 'none';
+                noMoreHistorySpan.style.display = 'block';
+            } else {
+                loadMoreBtn.style.display = 'block';
+                noMoreHistorySpan.style.display = 'none';
+            }
+            showState('content');
+        } else if (currentOffset === 0) {
+            showState('empty');
+        } else {
+            allHistoryLoaded = true;
+            loadMoreBtn.style.display = 'none';
+            noMoreHistorySpan.style.display = 'block';
+        }
+        
+    } catch (error) {
+        console.error('❌ Error:', error);
+        showErrorState(error.message);
+        allHistoryLoaded = true;
+        loadMoreBtn.style.display = 'none';
+        noMoreHistorySpan.style.display = 'none';
+    } finally {
+        isLoading = false;
+        loadMoreBtn.disabled = false;
+        loadMoreBtn.innerHTML = '⬇️ Load More';
+    }
+}
+
+function appendHistory(historyData) {
+    historyData.forEach((record) => {
+        const card = document.createElement('div');
+        card.className = 'history-card';
+        
+        const timestamp = record.prediction_timestamp ? 
+            new Date(record.prediction_timestamp).toLocaleString() : 'Unknown time';
+        
+        const rawText = record.raw_text || 'No text available';
+        const translatedText = record.translated_text || '';
+
+        const needsOriginalFullButton = rawText.length > 250;
+        const originalTextPreview = needsOriginalFullButton ? rawText.substring(0, 250) + '...' : rawText;
+
+        const needsTranslatedFullButton = translatedText.length > 250;
+        const translatedTextPreview = needsTranslatedFullButton ? translatedText.substring(0, 250) + '...' : translatedText;
+        
+        card.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: 600; color: #1f2937; margin-bottom: 12px;">
+                <span style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 4px 12px; border-radius: 8px; font-size: 0.9rem; margin-right: 12px;">
+                    ILR ${record.predicted_ilr_level || 'N/A'}
+                </span>
+                <span style="color: #64748b; font-size: 0.9rem;">${record.language || 'Unknown'}</span>
+            </div>
+            
+            <div style="color: #64748b; line-height: 1.6;">
+                <div style="margin-bottom: 12px;">
+                    <strong>Timestamp:</strong> 
+                    <span>${timestamp}</span>
+                </div>
+                
+                <div class="text-preview-container">
+                    <strong style="white-space: nowrap; margin-right: 10px;">Original Text:</strong>
+                    <em style="flex-grow: 1;">
+                        ${escapeHtml(originalTextPreview)}
+                    </em>
+                    ${needsOriginalFullButton ? `<button class="show-full-btn" data-record-id="${record.id}" data-text-type="original">Show Full</button>` : ''}
+                </div>
+
+                ${translatedText ? `
+                <div class="translated-preview-container">
+                    <i style="white-space: nowrap; margin-right: 10px;">Translated Text:</i>
+                    <em style="flex-grow: 1;">
+                        ${escapeHtml(translatedTextPreview)}
+                    </em>
+                    ${needsTranslatedFullButton ? `<button class="show-full-btn" data-record-id="${record.id}" data-text-type="translated">Show Full</button>` : ''}
+                </div>
+                ` : ''}
+            </div>
+            
+            <div class="features-detail" id="features-detail-${record.id}">
+                </div>
+        `;
+        
+        historyGrid.appendChild(card);
+
+        const showFullButtons = card.querySelectorAll('.show-full-btn');
+        showFullButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const recordId = button.dataset.recordId;
+                const textType = button.dataset.textType;
+                
+                const recordData = loadedRecords[recordId];
+                if (recordData) {
+                    let fullText = '';
+                    let modalDisplayTitle = '';
+                    if (textType === 'original') {
+                        fullText = recordData.raw_text;
+                        modalDisplayTitle = 'Original Text';
+                    } else if (textType === 'translated') {
+                        fullText = recordData.translated_text;
+                        modalDisplayTitle = 'Translated Text';
+                    }
+                    openModal(modalDisplayTitle, fullText);
+                } else {
+                    console.error('Record data not found for ID:', recordId);
+                    alert('Could not retrieve full text. Please try reloading the page.');
+                }
+            });
+        });
+
+        card.addEventListener('click', (event) => {
+            if (!event.target.closest('button') && !event.target.closest('select')) {
+                toggleFeatures(card, record.features);
+            }
+        });
+    });
+}
+
+function openModal(title, text) {
+    modalTitle.textContent = title;
+    
+    const preElement = document.createElement('pre');
+    preElement.style.margin = '0';
+    preElement.style.padding = '0';
+    preElement.style.whiteSpace = 'pre-wrap';
+    preElement.style.wordWrap = 'break-word';
+    preElement.textContent = text;
+
+    modalTextContent.innerHTML = '';
+    modalTextContent.appendChild(preElement);
+    
+    fullTextModal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    fullTextModal.classList.remove('show');
+    modalTitle.textContent = '';
+    modalTextContent.innerHTML = '';
+    document.body.style.overflow = '';
+}
+
+const historyCharts = {}; 
+
+function toggleFeatures(cardElement, features) {
+    const featuresDetailDiv = cardElement.querySelector('.features-detail');
+    
+    const cardId = cardElement.querySelector('[id^="features-detail-"]').id.replace('features-detail-', '');
+   
+    if (historyCharts[cardId]) {
+        historyCharts[cardId].destroy();
+        delete historyCharts[cardId];
+    }
+
+    if (featuresDetailDiv.classList.contains('show')) {
+        featuresDetailDiv.classList.remove('show');
+        featuresDetailDiv.innerHTML = '';
+    } else {
+        featuresDetailDiv.innerHTML = '';
+        
+        let probabilities = [];
+        let hasAllProbs = true;
+        for (let i = 0; i < 5; i++) {
+            const probKey = `Probabilities_ILR_${i}`;
+            if (typeof features[probKey] === 'number') {
+                probabilities.push(features[probKey]);
+            } else {
+                hasAllProbs = false;
+                break;
+            }
+        }
+
+        if (hasAllProbs && probabilities.length === 5) {
+          
+            const probChartHeader = document.createElement('h5');
+            probChartHeader.textContent = 'Probability Distribution:';
+            featuresDetailDiv.appendChild(probChartHeader);
+
+            const probChartContainer = document.createElement('div');
+            probChartContainer.className = 'probability-chart-container';
+            const probCanvas = document.createElement('canvas');
+            probCanvas.id = `history-prob-chart-${cardId}`;
+            probChartContainer.appendChild(probCanvas);
+            featuresDetailDiv.appendChild(probChartContainer);
+            
+            const probCtx = probCanvas.getContext('2d');
+            const ilrLabels = ["ILR 0", "ILR 1", "ILR 2", "ILR 3", "ILR 4"];
+            
+            historyCharts[cardId] = new Chart(probCtx, {
+                type: 'bar',
+                data: {
+                    labels: ilrLabels,
+                    datasets: [{
+                        label: 'Probability',
+                        data: probabilities.map(p => (p * 100).toFixed(2)),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Probability (%)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'ILR Level'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) { label += context.parsed.y + '%'; }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+        } else {
+            console.log("No valid probabilities for history card. Skipping probability chart.");
+        }
+
+ 
+        const featuresGridDiv = document.createElement('div');
+        featuresGridDiv.className = 'features-grid';
+        
+        const linguisticFeaturesHeader = document.createElement('h5');
+        linguisticFeaturesHeader.textContent = 'Detailed Linguistic Features:';
+        featuresDetailDiv.appendChild(linguisticFeaturesHeader);
+        featuresDetailDiv.appendChild(featuresGridDiv);
+
+        if (features) {
+            const filteredFeatures = {};
+            for (const key in features) {
+                if (features.hasOwnProperty(key) && !key.startsWith('Probabilities_ILR_')) {
+                    filteredFeatures[key] = features[key];
+                }
+            }
+
+            if (Object.keys(filteredFeatures).length > 0) {
+                for (const key in filteredFeatures) {
+                    if (filteredFeatures.hasOwnProperty(key)) {
+                        const featureItem = document.createElement('div');
+                        featureItem.className = 'feature-item';
+                        const value = typeof filteredFeatures[key] === 'number' ? filteredFeatures[key].toFixed(3) : (filteredFeatures[key] === null ? 'N/A' : filteredFeatures[key]);
+                        featureItem.innerHTML = `<div>${key}</div><div>${value}</div>`;
+                        featuresGridDiv.appendChild(featureItem);
+                    }
+                }
+            } else {
+                featuresGridDiv.innerHTML = '<p style="color: #9ca3af; text-align: center;">No linguistic features available for this entry.</p>';
+            }
+        } else {
+            featuresGridDiv.innerHTML = '<p style="color: #9ca3af; text-align: center;">No detailed features available for this entry.</p>';
+        }
+
+        featuresDetailDiv.classList.add('show');
+    }
+}
+
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+const debouncedApplyFilters = debounce(() => {
+    currentSearchQuery = searchText.value.trim();
+    loadHistory(true);
+}, 300);
+
+function handleSearchInput() {
+    debouncedApplyFilters();
+}
+
+function handleIlrFilterChange() {
+    currentIlrLevel = ilrFilter.value;
+    loadHistory(true);
+}
+
+function resetFilters() {
+    searchText.value = '';
+    ilrFilter.value = '';
+    currentSearchQuery = '';
+    currentIlrLevel = '';
+    loadHistory(true);
+}
+
+searchText.addEventListener('input', handleSearchInput);
+ilrFilter.addEventListener('change', handleIlrFilterChange);
+
+loadMoreBtn.addEventListener('click', () => loadHistory(false));
+
+window.addEventListener('scroll', () => {
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+    if (scrollTop + clientHeight >= scrollHeight - 200 && !isLoading && !allHistoryLoaded) {
+        loadHistory(false);
+    }
+});
+
+setTimeout(loadHistory, 100); 
+</script>
+{% endblock %}

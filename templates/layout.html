@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ILR Level Predictor{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            padding-top: 60px; 
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+           
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            font-weight: 400;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 0.9rem;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .login-info {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 0.9rem;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logout-btn, .login-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .logout-btn:hover, .login-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 32px;
+          
+        }
+
+        .nav-link {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 40px; 
+        }
+
+        .content-section:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.16);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            background: #f1f5f9;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+
+        .card-content {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .grid {
+            display: grid;
+            gap: 24px;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mb-4 {
+            margin-bottom: 24px;
+        }
+
+        .mt-4 {
+            margin-top: 24px;
+        }
+
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .login-prompt {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .login-prompt h2 {
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        .login-prompt p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+        }
+
+        .login-prompt a {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .login-prompt a:hover {
+            transform: translateY(-2px);
+        }
+
+        .site-footer {
+            margin-top: 60px; 
+            padding: 30px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+    
+        }
+        .site-footer p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        .site-footer strong {
+            color: white;
+        }
+        .site-footer ul {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+            display: inline-block; 
+        }
+        .site-footer li {
+            margin-bottom: 5px;
+        }
+        .site-footer a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .site-footer a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+
+        @media (max-width: 1024px) {
+            body {
+                padding-top: 40px;
+            }
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .content-section {
+                padding: 32px 24px;
+            }
+
+            .user-info, .login-info {
+                position: static;
+                margin: 0 auto 20px;
+                width: fit-content;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 20px;
+            }
+            .main-container {
+                padding: 0 16px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header .subtitle {
+                font-size: 1rem;
+            }
+            
+            .content-section {
+                padding: 24px 20px;
+            }
+
+            .navigation {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .nav-link {
+                width: 200px;
+                text-align: center;
+            }
+            .site-footer {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <div class="user-info" id="userInfo">
+                <span id="userEmail">Loading...</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+            
+            <div class="login-info" id="loginInfo">
+                <span>Not logged in</span>
+                <a href="/login" class="login-btn">Sign In</a>
+            </div>
+            
+            <h1>{% block header_title %}ILR Level Predictor{% endblock %}</h1>
+            <p class="subtitle">{% block subtitle %}Advanced linguistic analysis with feature visualization{% endblock %}</p>
+        </div>
+
+        <nav class="navigation">
+            <a href="/" class="nav-link {% block nav_home %}{% endblock %}">Home</a>
+            <a href="/history" class="nav-link {% block nav_history %}{% endblock %}">History</a>
+            <a href="/compare" class="nav-link {% block nav_compare %}{% endblock %}">Compare</a>
+            <a href="/batch" class="nav-link {% block nav_batch %}{% endblock %}">Batch</a>
+            <a href="/analytics" class="nav-link {% block nav_analytics %}{% endblock %}">Analytics</a>
+            <a href="/about" class="nav-link {% block nav_about %}{% endblock %}">About</a>
+        </nav>
+
+        <div class="login-prompt" id="loginPrompt">
+            <h2>Authentication Required</h2>
+            <p>Please log in with your UCF credentials to access this feature.</p>
+            <a href="/login">Sign In</a>
+        </div>
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="site-footer">
+        <p style="font-size: 16px;">Disclaimers & Language Support:</p>
+
+        <p>This ILR Level Predictor supports direct analysis for texts in <strong>English (EN), German (DE), and Korean (KO)</strong> using <strong>specialized TensorFlow models.</strong></p>
+        <p>For all other languages, input text will be automatically translated to English using a large multilingual translation model <strong> (Facebook M2M100)</strong>. The English translation will then be <strong>analyzed by the English TensorFlow model.</strong></p>
+        <p>Linguistic features (e.g., word count, sentence length) are extracted directly from the original text if it's <strong>English, German, or Korean.</strong> If translation occurs, these features are <strong>extracted from the English translation.</strong></p>
+        <p>This tool can <strong>ONLY predict ILR levels 0-4 NOT INCLUDING '+' LABELS</strong> due to specific training data provided for supervised learning approach</p>
+        <p>Accuracy may vary for translated or mixed-language texts. <strong>This tool is for educational and experimental purposes.</strong></p>
+    </footer>
+
+    <script>
+
+        const supabase = window.supabase.createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+        
+        let currentSession = null;
+        
+       
+        const originalFetch = window.fetch;
+        
+
+        const currentPath = window.location.pathname;
+        const isHomePage = currentPath === '/';
+        const isLoginPage = currentPath === '/login';
+        const isProtectedPage = ['/history', '/compare', '/batch', '/analytics', '/about'].includes(currentPath);
+        
+        
+ 
+        function updateDebugInfo() {
+            const authStatus = document.getElementById('authStatus');
+            const debugUser = document.getElementById('debugUser');
+            const debugBackend = document.getElementById('debugBackend');
+            
+            if (currentSession) {
+                authStatus.textContent = 'Authenticated';
+                debugUser.textContent = currentSession.user?.email || 'Unknown';
+            } else {
+                authStatus.textContent = 'Not authenticated';
+                debugUser.textContent = 'None';
+            }
+            debugBackend.textContent = 'Page loads without auth, APIs require auth';
+        }
+        
+     
+
+     
+        function updateUI() {
+            const userInfo = document.getElementById('userInfo');
+            const loginInfo = document.getElementById('loginInfo');
+            const loginPrompt = document.getElementById('loginPrompt');
+            
+            if (currentSession) {
+               
+           
+                
+                userInfo.style.display = 'flex';
+                loginInfo.style.display = 'none';
+                loginPrompt.style.display = 'none';
+                
+                document.getElementById('userEmail').textContent = currentSession.user.email;
+                
+                
+                if (isProtectedPage) {
+                    loadProtectedPageContent();
+                }
+                
+            } else {
+             
+          
+                
+                userInfo.style.display = 'none';
+                loginInfo.style.display = 'flex';
+                
+         
+                if (isProtectedPage) {
+                    loginPrompt.style.display = 'block';
+               
+                    const contentSections = document.querySelectorAll('.content-section');
+                    contentSections.forEach(section => {
+                        section.style.display = 'none';
+                    });
+                }
+            }
+        }
+
+      
+        async function loadProtectedPageContent() {
+            if (!currentSession) return;
+            
+         
+            
+            try {
+                if (currentPath === '/history') {
+          
+                } else if (currentPath === '/analytics') {
+                    const response = await fetch('/api/analytics-data');
+                    const data = await response.json();
+             
+        
+                }
+         
+            } catch (error) {
+                console.error('❌ Error loading protected content:', error);
+            }
+        }
+
+  
+        async function checkAuth() {
+        
+            
+            try {
+      
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error) {
+               
+                    currentSession = null;
+                    updateUI();
+                    return;
+                }
+                
+                if (!session) {
+            
+                    currentSession = null;
+                    updateUI();
+                    return;
+                }
+
+
+     
+                if (!session.user.email.endsWith('@ucf.edu')) {
+                
+                    alert('Access restricted to UCF email addresses only.');
+                    await supabase.auth.signOut();
+                    currentSession = null;
+                    updateUI();
+                    return;
+                }
+
+             
+                currentSession = session;
+         
+                updateUI();
+                
+            } catch (error) {
+               
+                currentSession = null;
+                updateUI();
+            }
+        }
+
+        async function logout() {
+     
+            
+            try {
+                await supabase.auth.signOut();
+                currentSession = null;
+                updateUI();
+      
+            
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout error:', error);
+           
+                currentSession = null;
+                updateUI();
+ 
+                window.location.href = '/login';
+            }
+        }
+
+        function makeAuthenticatedRequest(url, options = {}) {
+           
+
+            if (!currentSession || !currentSession.access_token) {
+                console.error('No valid session found for API request');
+ 
+                if (isProtectedPage || url.startsWith('/api/predict') || url.startsWith('/predict-batch') || url.startsWith('/api/history')) {
+                     alert('Your session has expired or you are not logged in. Please sign in again.');
+                     window.location.href = '/login';
+                }
+                throw new Error('No valid session for API request');
+            }
+
+            const token = currentSession.access_token;
+         
+
+            const headers = {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+
+            return originalFetch(url, {
+                ...options,
+                headers
+            }).then(response => {
+                console.log('Response status:', response.status);
+
+                if (response.status === 401) {
+                    console.error('❌ 401 Unauthorized - token may be expired');
+                    currentSession = null;
+                    updateUI();
+                    alert('Your session has expired. Please sign in again.');
+                    window.location.href = '/login'; 
+                    throw new Error('Authentication failed - 401');
+                }
+
+                if (response.status === 403) {
+                    console.error('❌ 403 Forbidden - access denied');
+                    currentSession = null;
+                    updateUI();
+                    alert('Access forbidden. Your account may not have the necessary permissions.');
+                    window.location.href = '/login'; 
+                    throw new Error('Access forbidden - 403');
+                }
+
+                return response;
+            }).catch(error => {
+                console.error('❌ Request failed:', error);
+                throw error;
+            });
+        }
+
+     
+        window.fetch = function(url, options = {}) {
+       
+            let fullUrl;
+            try {
+                fullUrl = new URL(url, window.location.origin);
+            } catch (e) {
+                fullUrl = new URL(url, window.location.origin);
+            }
+            
+            const pathname = fullUrl.pathname;
+
+        
+            const protectedPaths = ['/api/', '/predict', '/predict-batch', '/upload-files'];
+            const needsAuth = protectedPaths.some(path => pathname.startsWith(path));
+            
+            if (needsAuth) {
+          
+                return makeAuthenticatedRequest(url, options);
+            }
+            
+            return originalFetch(url, options);
+        };
+
+   
+        if (supabase) {
+            supabase.auth.onAuthStateChange((event, session) => {
+            
+                
+                if (event === 'SIGNED_OUT' || !session) {
+                    currentSession = null;
+                    updateUI();
+                } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+                    currentSession = session;
+                    updateUI();
+                }
+            });
+            
+       
+            checkAuth();
+        } else {
+            console.error('❌ Supabase not initialized');
+        }
+
+    
+        updateDebugInfo();
+        updateUI();
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

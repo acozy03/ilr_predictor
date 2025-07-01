@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ILR Level Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .login-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .login-subtitle {
+            color: #64748b;
+            margin-bottom: 32px;
+            font-size: 1rem;
+        }
+
+        .ucf-notice {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 32px;
+            font-size: 0.9rem;
+            color: #92400e;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border: 2px solid #ef4444;
+            border-radius: 12px;
+            padding: 16px;
+            color: #dc2626;
+            font-size: 0.9rem;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 2px solid #22c55e;
+            border-radius: 12px;
+            padding: 16px;
+            color: #166534;
+            font-size: 0.9rem;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .auth-loading {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 40px;
+        }
+
+        .auth-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .auth-loading-text {
+            color: #64748b;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .divider {
+            margin: 24px 0;
+            text-align: center;
+            position: relative;
+            color: #9ca3af;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex-grow: 1;
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0 10px;
+        }
+
+        .divider span {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0 8px;
+            z-index: 1;
+        }
+
+        .signup-link {
+            margin-top: 24px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .signup-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+ 
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+        .modal-close-btn:hover {
+            color: #374151;
+        }
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+        .modal-subtitle {
+            color: #64748b;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+  
+        #modalLoading .spinner {
+            border-top: 2px solid #667eea;
+            border-left-color: rgba(102, 126, 234, 0.3);
+        }
+        #modalLoading span {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="auth-loading" id="authLoading">
+            <div class="auth-spinner"></div>
+            <div class="auth-loading-text">Checking authentication...</div>
+        </div>
+
+        <div id="loginForm" style="display: none;">
+            <div class="logo"></div>
+            <h1 class="login-title">Machine Learning ILR Predictor</h1>
+            <p class="login-subtitle">Sign in to access the text analysis platform</p>
+            
+            <div class="ucf-notice">
+                <strong>UCF Access Only</strong><br>
+                This platform is restricted to University of Central Florida users. Please use your @ucf.edu email address.
+            </div>
+
+            <form class="login-form" id="loginFormElement">
+                <div class="form-group">
+                    <label class="form-label" for="email">UCF Email Address</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        class="form-input" 
+                        placeholder="your.name@ucf.edu"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        class="form-input" 
+                        placeholder="Enter your password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="login-btn" id="loginBtn">
+                    <span class="button-text">Sign In</span>
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <span>Signing in...</span>
+                    </div>
+                </button>
+            </form>
+
+            <div class="divider">
+                <span>or</span>
+            </div>
+
+            <button class="login-btn" onclick="openSignUpModal()" id="signupModalBtn" style="background: rgba(102, 126, 234, 0.1); color: #667eea; border: 2px solid #667eea;">
+                Request Account Verification
+            </button>
+
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+        </div>
+    </div>
+
+    <div id="signUpModal" class="modal-overlay" onclick="closeSignUpModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close-btn" onclick="closeSignUpModal()">×</button>
+            <h3 class="modal-title">Request Account Verification</h3>
+            <p class="modal-subtitle">Enter your UCF email and choose a password to create an account. A verification email will be sent.</p>
+            
+            <form class="login-form" id="signUpFormElement">
+                <div class="form-group">
+                    <label class="form-label" for="signUpEmail">UCF Email Address</label>
+                    <input 
+                        type="email" 
+                        id="signUpEmail" 
+                        class="form-input" 
+                        placeholder="your.name@ucf.edu"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="signUpPassword">Choose Password</label>
+                    <input 
+                        type="password" 
+                        id="signUpPassword" 
+                        class="form-input" 
+                        placeholder="Choose a strong password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="login-btn" id="signUpSubmitBtn">
+                    <span class="button-text">Create Account</span>
+                    <div class="loading" id="modalLoading">
+                        <div class="spinner"></div>
+                        <span>Creating...</span>
+                    </div>
+                </button>
+            </form>
+            
+            <div class="error-message" id="signUpErrorMessage"></div>
+            <div class="success-message" id="signUpSuccessMessage"></div>
+        </div>
+    </div>
+
+
+    <script>
+        const supabase = window.supabase.createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
+        let currentSession = null;
+
+        function showLoading(show) {
+            const button = document.getElementById('loginBtn');
+            const buttonText = button.querySelector('.button-text');
+            const loading = document.getElementById('loading');
+            
+            if (show) {
+                buttonText.style.display = 'none';
+                loading.style.display = 'flex';
+                button.disabled = true;
+            } else {
+                buttonText.style.display = 'inline';
+                loading.style.display = 'none';
+                button.disabled = false;
+            }
+        }
+
+        function showModalLoading(show) {
+            const button = document.getElementById('signUpSubmitBtn');
+            const buttonText = button.querySelector('.button-text');
+            const loading = document.getElementById('modalLoading');
+
+            if (show) {
+                buttonText.style.display = 'none';
+                loading.style.display = 'flex';
+                button.disabled = true;
+            } else {
+                buttonText.style.display = 'inline';
+                loading.style.display = 'none';
+                button.disabled = false;
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            successDiv.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+        }
+        
+        function showSignUpError(message) {
+            const errorDiv = document.getElementById('signUpErrorMessage');
+            const successDiv = document.getElementById('signUpSuccessMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            successDiv.style.display = 'none';
+        }
+
+        function showSignUpSuccess(message) {
+            const errorDiv = document.getElementById('signUpErrorMessage');
+            const successDiv = document.getElementById('signUpSuccessMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function hideSignUpMessages() {
+            document.getElementById('signUpErrorMessage').style.display = 'none';
+            document.getElementById('signUpSuccessMessage').style.display = 'none';
+        }
+
+        function validateUCFEmail(email) {
+            return email.endsWith('@ucf.edu');
+        }
+
+        function openSignUpModal() {
+            hideSignUpMessages();
+            document.getElementById('signUpModal').classList.add('show');
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        function closeSignUpModal() {
+            document.getElementById('signUpModal').classList.remove('show');
+            document.body.style.overflow = ''; 
+        
+            document.getElementById('signUpEmail').value = '';
+            document.getElementById('signUpPassword').value = '';
+            hideSignUpMessages();
+        }
+
+        function showAuthLoading() {
+            document.getElementById('authLoading').style.display = 'flex';
+            document.getElementById('loginForm').style.display = 'none';
+        }
+
+        function showLoginForm() {
+            document.getElementById('authLoading').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+        }
+
+        function redirectToApp() {
+            showSuccess('Already logged in! Redirecting...');
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1500);
+        }
+
+
+        async function checkExistingSession() {
+            showAuthLoading();
+            
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error) {
+                    showLoginForm();
+                    return;
+                }
+                
+                if (session && session.user) {
+               
+                    if (!session.user.email.endsWith('@ucf.edu')) {
+                        await supabase.auth.signOut();
+                        showLoginForm();
+                        return;
+                    }
+                    
+                    currentSession = session;
+                    redirectToApp();
+                } else {
+                    showLoginForm();
+                }
+                
+            } catch (error) {
+                showLoginForm();
+            }
+        }
+
+        document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            console.log('Login attempt for:', email);
+            
+      
+            if (!validateUCFEmail(email)) {
+                showError('Please use a valid @ucf.edu email address.');
+                return;
+            }
+            
+            showLoading(true);
+            hideMessages();
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password,
+                });
+                
+                if (error) throw error;
+                
+                currentSession = data.session;
+                showSuccess('Login successful! Redirecting...');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+                
+            } catch (error) {
+                showError(error.message || 'Authentication failed. Please try again.');
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        document.getElementById('signUpFormElement').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('signUpEmail').value;
+            const password = document.getElementById('signUpPassword').value;
+
+            console.log('Sign up attempt for:', email);
+
+            if (!validateUCFEmail(email)) {
+                showSignUpError('Please use a valid @ucf.edu email address.');
+                return;
+            }
+
+            showModalLoading(true);
+            hideSignUpMessages();
+
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                });
+
+                if (error) {
+                    console.error("Supabase signUp error object:", error); 
+
+                    if (error.message.includes('already exists') || error.message.includes('user already registered') || (error.code && String(error.code) === '400' && error.msg && error.msg.includes('user with this email already exists')) || error.message.includes('duplicate key')) {
+                         showSignUpSuccess('If an account with this email exists, a verification email has been resent. Please check your inbox (and spam folder) and sign in.');
+                    } else if (error.message.includes('password is too weak')) {
+                        showSignUpError('Password is too weak. Please choose a stronger password.');
+                    }
+                    else {
+                        showSignUpError(error.message || 'Account creation failed. Please try again.');
+                    }
+                } else {
+                 
+                    console.log("New user signed up successfully:", data);
+                    showSignUpSuccess('Account verification email sent! Please check your UCF inbox (and spam folder) to verify your account. You can then sign in.');
+                }
+
+            } catch (error) {
+                console.error("Generic sign up error:", error);
+                showSignUpError(error.message || 'Account creation failed. Please try again.');
+            } finally {
+                showModalLoading(false);
+            }
+        });
+
+
+ 
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+                currentSession = session;
+            } else if (event === 'SIGNED_OUT') {
+                currentSession = null;
+                showLoginForm();
+            }
+        });
+
+
+        checkExistingSession();
+    </script>
+</body>
+</html>

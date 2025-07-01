@@ -1,0 +1,475 @@
+{% extends "layout.html" %}
+
+{% block title %}Text Comparison - ILR Predictor{% endblock %}
+{% block header_title %}Text Comparison Tool{% endblock %}
+{% block subtitle %}Compare linguistic complexity between multiple texts{% endblock %}
+
+{% block extra_head %}
+<style>
+    .comparison-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+    
+    .text-input-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .comparison-results {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-top: 32px;
+        display: none;
+        animation: slideIn 0.5s ease;
+    }
+    
+    .comparison-results.show {
+        display: block;
+    }
+    
+    .vs-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+        margin: 20px 0;
+    }
+    
+    .result-comparison {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 24px;
+        align-items: center;
+        margin-bottom: 32px;
+    }
+    
+    .result-card {
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        border: 2px solid #0ea5e9;
+        border-radius: 16px;
+        padding: 24px;
+        text-align: center;
+    }
+    
+    .result-card.winner {
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        border-color: #22c55e;
+        transform: scale(1.05);
+    }
+    
+    .feature-comparison-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 2fr;
+        gap: 16px;
+        align-items: center;
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 8px;
+        background: #f8fafc;
+    }
+    
+    .feature-bar {
+        height: 8px;
+        border-radius: 4px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        transition: width 0.5s ease;
+    }
+
+  
+    .probability-comparison-section, .linguistic-comparison-section {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        margin-top: 24px; 
+    }
+    .probability-comparison-section h3, .linguistic-comparison-section h3 {
+        font-size: 1.5rem;
+        color: #1f2937;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .probability-charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    .chart-panel {
+        text-align: center;
+    }
+    .chart-panel h4 { 
+        font-size: 1.2rem;
+        color: #374151;
+        margin-bottom: 15px;
+    }
+    .chart-panel canvas {
+        height: 200px !important; 
+        max-height: 100%; 
+        width: 100% !important;
+    }
+
+    @media (max-width: 768px) {
+        .comparison-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .result-comparison {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        
+        .vs-indicator {
+            order: -1;
+        }
+        .probability-charts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="comparison-grid">
+    <div class="text-input-card">
+        <div class="section-title">
+            
+            Text A
+        </div>
+        <textarea id="textA" placeholder="Enter first text for comparison..." style="width: 100%; min-height: 200px; padding: 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-family: inherit; resize: vertical;"></textarea>
+        <div style="text-align: right; font-size: 0.875rem; color: #6b7280; margin-top: 8px;" id="counterA">0 characters</div>
+    </div>
+    
+    <div class="text-input-card">
+        <div class="section-title">
+      
+            Text B
+        </div>
+        <textarea id="textB" placeholder="Enter second text for comparison..." style="width: 100%; min-height: 200px; padding: 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-family: inherit; resize: vertical;"></textarea>
+        <div style="text-align: right; font-size: 0.875rem; color: #6b7280; margin-top: 8px;" id="counterB">0 characters</div>
+    </div>
+</div>
+
+<div class="vs-indicator">VS</div>
+
+<div class="text-center">
+    <button class="btn" onclick="compareTexts()" id="compareBtn">
+        Compare Texts
+    </button>
+</div>
+
+<div class="comparison-results" id="comparisonResults">
+    <div class="section-title">
+     
+        Comparison Results
+    </div>
+    
+    <div class="result-comparison" id="resultComparison">
+        <div class="result-card" id="resultA">
+            <div style="font-size: 0.9rem; color: #0369a1; margin-bottom: 8px;">Text A - ILR Level</div>
+            <div style="font-size: 2rem; font-weight: 700; color: #0c4a6e;" id="levelA">-</div>
+            <div style="font-size: 0.8rem; color: #64748b; margin-top: 5px;" id="langA"></div>
+        </div>
+        
+        <div style="font-size: 1.5rem; color: #667eea;">VS</div>
+        
+        <div class="result-card" id="resultB">
+            <div style="font-size: 0.9rem; color: #0369a1; margin-bottom: 8px;">Text B - ILR Level</div>
+            <div style="font-size: 2rem; font-weight: 700; color: #0c4a6e;" id="levelB">-</div>
+            <div style="font-size: 0.8rem; color: #64748b; margin-top: 5px;" id="langB"></div>
+        </div>
+    </div>
+    
+    <div id="comparisonDetailSection">
+        </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+let probChartA = null; 
+let probChartB = null; 
+
+document.getElementById('textA').addEventListener('input', function() {
+    document.getElementById('counterA').textContent = this.value.length + ' characters';
+});
+
+document.getElementById('textB').addEventListener('input', function() {
+    document.getElementById('counterB').textContent = this.value.length + ' characters';
+});
+
+async function compareTexts() {
+    const textA = document.getElementById('textA').value.trim();
+    const textB = document.getElementById('textB').value.trim();
+    
+    if (!textA || !textB) {
+        alert('Please enter both texts for comparison.');
+        return;
+    }
+    
+    const compareBtn = document.getElementById('compareBtn');
+    compareBtn.textContent = 'Comparing...';
+    compareBtn.disabled = true;
+
+
+    if (probChartA) probChartA.destroy(); probChartA = null;
+    if (probChartB) probChartB.destroy(); probChartB = null;
+    document.getElementById('comparisonDetailSection').innerHTML = '';
+    
+    try {
+    
+
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        const [responseA, responseB] = await Promise.all([
+            fetch('/predict', { method: 'POST', headers: headers, body: JSON.stringify({ text: textA }) }),
+            fetch('/predict', { method: 'POST', headers: headers, body: JSON.stringify({ text: textB }) })
+        ]);
+        
+        const dataA = await responseA.json();
+        const dataB = await responseB.json();
+
+        if (!responseA.ok || !responseB.ok) {
+             const errorDetailA = dataA.detail || `Text A failed with status ${responseA.status}`;
+             const errorDetailB = dataB.detail || `Text B failed with status ${responseB.status}`;
+             throw new Error(`Comparison failed. Errors: ${!responseA.ok ? errorDetailA : ''} ${!responseB.ok ? errorDetailB : ''}`);
+        }
+        
+        displayComparison(dataA, dataB);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert(`Failed to compare texts: ${error.message}. Please check your texts and try again.`);
+    } finally {
+        compareBtn.textContent = 'Compare Texts';
+        compareBtn.disabled = false;
+    }
+}
+
+function displayComparison(dataA, dataB) {
+    console.log("Data A:", dataA); 
+    console.log("Data B:", dataB); 
+
+    const resultsDiv = document.getElementById('comparisonResults');
+    const levelA = document.getElementById('levelA');
+    const levelB = document.getElementById('levelB');
+    const resultA = document.getElementById('resultA');
+    const resultB = document.getElementById('resultB');
+    const langA = document.getElementById('langA');
+    const langB = document.getElementById('langB');
+    const detailSection = document.getElementById('comparisonDetailSection');
+    detailSection.innerHTML = '';
+
+    levelA.textContent = dataA.predicted_ilr;
+    levelB.textContent = dataB.predicted_ilr;
+    langA.textContent = `(${dataA.original_language.toUpperCase()})`;
+    langB.textContent = `(${dataB.original_language.toUpperCase()})`;
+   
+    resultA.classList.remove('winner');
+    resultB.classList.remove('winner');
+    
+    if (dataA.predicted_ilr > dataB.predicted_ilr) {
+        resultA.classList.add('winner');
+    } else if (dataB.predicted_ilr > dataA.predicted_ilr) {
+        resultB.classList.add('winner');
+    }
+    
+
+    const hasProbabilitiesA = dataA.probabilities && Array.isArray(dataA.probabilities) && dataA.probabilities.length === 5;
+    const hasProbabilitiesB = dataB.probabilities && Array.isArray(dataB.probabilities) && dataB.probabilities.length === 5;
+
+    if (hasProbabilitiesA && hasProbabilitiesB) {
+        const probSection = document.createElement('div');
+        probSection.className = 'probability-comparison-section';
+        probSection.innerHTML = `
+            <h3>Probability Distribution Comparison</h3>
+            <div class="probability-charts-grid">
+                <div class="chart-panel">
+                    <h4>Text A</h4>
+                    <canvas id="probChartA"></canvas>
+                </div>
+                <div class="chart-panel">
+                    <h4>Text B</h4>
+                    <canvas id="probChartB"></canvas>
+                </div>
+            </div>
+        `;
+        detailSection.appendChild(probSection);
+        createProbabilityBarChart('probChartA', dataA.probabilities);
+        createProbabilityBarChart('probChartB', dataB.probabilities);
+    } else {
+        console.warn("One or both texts lack complete probability data. Skipping probability comparison charts.");
+    }
+
+  
+    const hasFeaturesA = dataA.features && Object.keys(dataA.features).length > 0;
+    const hasFeaturesB = dataB.features && Object.keys(dataB.features).length > 0;
+
+    if (hasFeaturesA && hasFeaturesB) {
+        const featureSection = document.createElement('div');
+        featureSection.className = 'linguistic-comparison-section';
+        featureSection.innerHTML = `<h3>Linguistic Feature Comparison</h3><div id="featureComparisonContainer"></div>`;
+        detailSection.appendChild(featureSection);
+        createFeatureComparisonBars(dataA.features, dataB.features, 'featureComparisonContainer');
+    } else {
+        console.warn("One or both texts lack complete linguistic feature data. Skipping feature comparison bars.");
+        const missingFeaturesMsg = document.createElement('div');
+        missingFeaturesMsg.innerHTML = `
+            <div style="background: white; border-radius: 16px; padding: 24px; margin-top: 24px; text-align: center;">
+                <p style="color: #64748b;">Linguistic features not available for comparison. This might happen if feature extraction failed for one or both texts.</p>
+            </div>
+        `;
+        detailSection.appendChild(missingFeaturesMsg);
+    }
+    
+    resultsDiv.classList.add('show');
+}
+
+function createProbabilityBarChart(canvasId, probabilities) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) {
+        console.error(`Canvas element '${canvasId}' not found for probability chart.`);
+        return null;
+    }
+    const chartCtx = ctx.getContext("2d");
+
+  
+    let existingChart = (canvasId === 'probChartA') ? probChartA : probChartB;
+    if (existingChart) {
+        existingChart.destroy();
+    }
+
+    const ilrLabels = ["ILR 0", "ILR 1", "ILR 2", "ILR 3", "ILR 4"];
+
+    const newChart = new Chart(chartCtx, {
+        type: "bar",
+        data: {
+            labels: ilrLabels,
+            datasets: [{
+                label: "Probability",
+                data: probabilities.map(p => parseFloat((p * 100).toFixed(2))),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Probability (%)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'ILR Level'
+                    }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) { label += ': '; }
+                            if (context.parsed.y !== null) { label += context.parsed.y + '%'; }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    if (canvasId === 'probChartA') {
+        probChartA = newChart;
+    } else { 
+        probChartB = newChart;
+    }
+    return newChart;
+}
+
+function createFeatureComparisonBars(featuresA, featuresB, containerId) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    
+  
+    const allFeatureKeys = new Set([
+        ...Object.keys(featuresA).filter(key => !key.startsWith('Probabilities_ILR_')),
+        ...Object.keys(featuresB).filter(key => !key.startsWith('Probabilities_ILR_'))
+    ]);
+
+
+    const sortedKeys = Array.from(allFeatureKeys).sort();
+    
+    sortedKeys.forEach(feature => {
+     
+        const valueA = featuresA[feature] !== null && featuresA[feature] !== undefined ? featuresA[feature] : 0;
+        const valueB = featuresB[feature] !== null && featuresB[feature] !== undefined ? featuresB[feature] : 0;
+        
+     
+        const maxValue = Math.max(valueA, valueB, 0.01); 
+
+        const featureDiv = document.createElement('div');
+        featureDiv.className = 'feature-comparison-row'; 
+        featureDiv.innerHTML = `
+            <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span style="font-size: 0.9rem; color: #374151;">${feature}</span>
+                    <span style="font-size: 0.8rem; color: #6b7280;">${typeof valueA === 'number' ? valueA.toFixed(2) : valueA}</span>
+                </div>
+                <div style="background: #e5e7eb; border-radius: 4px; height: 8px;">
+                    <div class="feature-bar" style="width: ${(valueA / maxValue) * 100}%;"></div>
+                </div>
+            </div>
+            <div style="text-align: center; font-weight: 600; color: #667eea;">VS</div>
+            <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span style="font-size: 0.9rem; color: #374151;">${feature}</span>
+                    <span style="font-size: 0.8rem; color: #6b7280;">${typeof valueB === 'number' ? valueB.toFixed(2) : valueB}</span>
+                </div>
+                <div style="background: #e5e7eb; border-radius: 4px; height: 8px;">
+                    <div class="feature-bar" style="width: ${(valueB / maxValue) * 100}%;"></div>
+                </div>
+            </div>
+        `;
+        container.appendChild(featureDiv);
+    });
+}
+</script>
+{% endblock %}

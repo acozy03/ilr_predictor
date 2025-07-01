@@ -1,0 +1,660 @@
+{% extends "layout.html" %}
+
+{% block title %}ILR Level Predictor - Home{% endblock %}
+{% block nav_home %}active{% endblock %}
+
+{% block extra_head %}
+<style>
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+        align-items: start;
+    }
+
+    .input-section, .results-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .input-section:hover, .results-section:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.16);
+    }
+
+    .input-group {
+        margin-bottom: 24px;
+    }
+
+    label {
+        display: block;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    textarea {
+        width: 100%;
+        min-height: 200px;
+        padding: 20px;
+        border: 2px solid #e5e7eb;
+        border-radius: 16px;
+        font-size: 16px;
+        font-family: inherit;
+        line-height: 1.6;
+        resize: vertical;
+        transition: all 0.3s ease;
+        background: #fafafa;
+    }
+
+    textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    textarea::placeholder {
+        color: #9ca3af;
+    }
+
+    .char-counter {
+        text-align: right;
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-top: 8px;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 16px 32px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .loading {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .prediction-result {
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        border: 2px solid #0ea5e9;
+        border-radius: 16px;
+        padding: 24px;
+        text-align: center;
+        margin-bottom: 32px;
+        display: none;
+        animation: slideIn 0.5s ease;
+    }
+
+    .prediction-result.show {
+        display: block;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .result-label {
+        font-size: 1rem;
+        color: #0369a1;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .result-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #0c4a6e;
+        margin-bottom: 8px;
+    }
+
+    .result-description {
+        font-size: 0.9rem;
+        color: #0369a1;
+        opacity: 0.8;
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        display: none;
+        min-height: 250px; 
+        margin-top: 20px;
+    }
+  
+    .chart-container canvas {
+        height: 200px !important; 
+        max-height: 100%; 
+        width: 100% !important; 
+    }
+
+
+    .chart-container.show {
+        display: block;
+        animation: slideIn 0.5s ease 0.2s both;
+    }
+
+    .chart-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 16px;
+        text-align: center;
+    }
+
+    .error-container {
+        background: linear-gradient(135deg, #fef2f2, #fee2e2);
+        border: 2px solid #ef4444;
+        border-radius: 16px;
+        padding: 24px;
+        text-align: center;
+        display: none;
+        animation: slideIn 0.5s ease;
+    }
+
+    .error-container.show {
+        display: block;
+    }
+
+    .error-text {
+        color: #dc2626;
+        font-weight: 500;
+    }
+    
+  
+    #global-loading-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0%;
+        height: 5px;
+        background-color: #667eea;
+        z-index: 9999;
+        display: none;
+        transition: width 0.3s ease-out;
+    }
+
+    .info-message {
+        background: #e0f7fa;
+        border: 1px solid #b2ebf2;
+        border-radius: 8px;
+        padding: 10px 15px;
+        margin-top: 20px;
+        font-size: 0.9rem;
+        color: #00838f;
+        display: none; 
+    }
+    .info-message.show {
+        display: block;
+    }
+
+
+    @media (max-width: 1024px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-grid">
+    <div class="input-section">
+        <div class="section-title">
+            
+            Text Analysis
+        </div>
+        
+        <div class="input-group">
+            <label for="inputText">Enter your text for analysis</label>
+            <textarea 
+                id="inputText" 
+                placeholder="Paste or type your text here to analyze its complexity and predict the required ILR proficiency level..."
+                oninput="updateCharCounter()"
+            ></textarea>
+            <div class="char-counter" id="charCounter">0 characters</div>
+        </div>
+
+        <button class="submit-btn" onclick="submitText()" id="submitBtn">
+            <span class="button-text">Analyze Text</span>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <span>Analyzing...</span>
+            </div>
+        </button>
+    </div>
+
+    <div class="results-section">
+        <div class="section-title">
+          
+            Analysis Results
+        </div>
+
+        <div class="prediction-result" id="predictionResult">
+            <div class="result-label">Predicted ILR Level</div>
+            <div class="result-value" id="resultValue">-</div>
+            <div class="result-description" id="resultDescription">Professional working proficiency</div>
+        </div>
+
+        <div class="chart-container" id="probabilityChartContainer">
+            <div class="chart-title">Probability Distribution</div>
+            <canvas id="probabilityChart"></canvas> 
+        </div>
+        
+        <div class="chart-container" id="featureChartContainer">
+            <div class="chart-title">Linguistic Feature Analysis</div>
+            <canvas id="featureChart"></canvas> 
+        </div>
+
+        <div class="info-message" id="backgroundProcessMessage"></div>
+
+        <div class="error-container" id="errorContainer">
+            <div class="error-text" id="errorText">An error occurred while analyzing the text.</div>
+        </div>
+    </div>
+</div>
+
+<div id="global-loading-bar"></div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  
+    let isSingleQueryInProgress = false;
+
+
+    let featureRadarChart = null;
+    let probabilityBarChart = null;
+
+   
+    const backgroundProcessMessage = document.getElementById('backgroundProcessMessage');
+
+    function updateCharCounter() {
+        const text = document.getElementById("inputText").value;
+        const counter = document.getElementById("charCounter");
+        counter.textContent = `${text.length} characters`;
+    }
+
+    function showGlobalLoading(show) {
+        const globalLoadingBar = document.getElementById('global-loading-bar');
+        if (show) {
+            globalLoadingBar.style.display = 'block';
+            globalLoadingBar.style.width = '20%'; 
+        } else {
+            globalLoadingBar.style.width = '100%'; 
+            setTimeout(() => { 
+                globalLoadingBar.style.display = 'none';
+                globalLoadingBar.style.width = '0%';
+            }, 300);
+        }
+    }
+
+    function showLoading(show) {
+        const button = document.getElementById("submitBtn");
+        const buttonText = button.querySelector(".button-text");
+        const loading = document.getElementById("loading");
+        const inputTextarea = document.getElementById("inputText");
+        
+        if (show) {
+            buttonText.style.display = "none";
+            loading.style.display = "flex";
+            button.disabled = true;
+            inputTextarea.disabled = true; 
+            backgroundProcessMessage.classList.remove('show'); 
+            showGlobalLoading(true);
+        } else {
+            buttonText.style.display = "inline";
+            loading.style.display = "none";
+            button.disabled = false;
+            inputTextarea.disabled = false; 
+            showGlobalLoading(false); 
+        }
+    }
+
+    function showResult(data) {
+        console.log("showResult received data:", data);
+        const predictionResult = document.getElementById("predictionResult");
+        const resultValue = document.getElementById("resultValue");
+        const resultDescription = document.getElementById("resultDescription");
+        const errorContainer = document.getElementById("errorContainer");
+        const featureChartContainer = document.getElementById("featureChartContainer");
+        const probabilityChartContainer = document.getElementById("probabilityChartContainer");
+
+        errorContainer.classList.remove("show");
+
+        resultValue.textContent = data.predicted_ilr;
+
+        const descriptions = {
+            "0": "No functional ability", "0+": "Memorized proficiency",
+            "1": "Elementary proficiency", "1+": "Elementary proficiency plus",
+            "2": "Limited working proficiency", "2+": "Limited working proficiency plus",
+            "3": "Professional working proficiency", "3+": "Professional working proficiency plus",
+            "4": "Full professional proficiency", "4+": "Full professional proficiency plus",
+            "5": "Native or bilingual proficiency"
+        };
+        resultDescription.textContent = descriptions[data.predicted_ilr] || "Professional working proficiency";
+
+        let languageInfo = `Detected language: <b>${data.original_language.toUpperCase()}</b>`;
+        if (data.translated_text) {
+             languageInfo += `<br><span style="font-size: 0.9rem; color: #64748b;">(Translated to English for analysis)</span>`;
+        }
+        resultDescription.innerHTML += `<br><span style="font-size: 0.9rem; color: #64748b;">${languageInfo}</span>`;
+
+        predictionResult.classList.add("show");
+        
+        
+        if (featureRadarChart) { featureRadarChart.destroy(); featureRadarChart = null; }
+        if (probabilityBarChart) { probabilityBarChart.destroy(); probabilityBarChart = null; }
+
+        if (data.probabilities && Array.isArray(data.probabilities) && data.probabilities.length === 5) {
+            console.log("Displaying probability chart.");
+            probabilityChartContainer.classList.add('show');
+            createProbabilityBarChart(data.probabilities);
+        } else {
+            console.warn("No valid probabilities received or not 5 values. Hiding probability chart.");
+            probabilityChartContainer.classList.remove('show');
+        }
+
+        if (data.features && Object.keys(data.features).length > 0) {
+            console.log("Displaying linguistic feature chart.");
+            featureChartContainer.classList.add('show');
+            createRadarChart(data.features);
+        } else {
+            console.warn("No valid features received or empty. Hiding feature chart.");
+            featureChartContainer.classList.remove('show');
+        }
+
+      
+        if (data.translated_text) {
+            backgroundProcessMessage.textContent = `Analysis included translation from ${data.original_language.toUpperCase()} to English.`;
+            backgroundProcessMessage.classList.add('show');
+        } else {
+            backgroundProcessMessage.classList.remove('show');
+        }
+    }
+
+    function showError(message) {
+        console.error("Showing error:", message);
+        const errorContainer = document.getElementById("errorContainer");
+        const errorText = document.getElementById("errorText");
+        const predictionResult = document.getElementById("predictionResult");
+        const featureChartContainer = document.getElementById("featureChartContainer");
+        const probabilityChartContainer = document.getElementById("probabilityChartContainer");
+        
+        predictionResult.classList.remove("show");
+        featureChartContainer.classList.remove("show");
+        probabilityChartContainer.classList.remove("show");
+        backgroundProcessMessage.classList.remove('show');
+        
+        if (featureRadarChart) { featureRadarChart.destroy(); featureRadarChart = null; }
+        if (probabilityBarChart) { probabilityBarChart.destroy(); probabilityBarChart = null; }
+
+        errorText.textContent = message;
+        errorContainer.classList.add("show");
+    }
+
+    async function submitText() {
+        if (isSingleQueryInProgress) {
+            alert('A text analysis is already in progress. Please wait.');
+            return;
+        }
+
+        const text = document.getElementById("inputText").value.trim();
+        
+        if (!text) {
+            showError("Please enter some text to analyze.");
+            return;
+        }
+        
+        isSingleQueryInProgress = true;
+        showLoading(true);
+        
+        try {
+        
+            const response = await fetch("http://127.0.0.1:8000/predict", {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ text }),
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || `Server error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            showResult(data);
+            
+        } catch (error) {
+            console.error("Fetch/Processing error:", error);
+            showError(`Failed to analyze text: ${error.message}. Check browser console for details.`);
+        } finally {
+            isSingleQueryInProgress = false;
+            showLoading(false);
+        }
+    }
+
+    function createProbabilityBarChart(probabilities) {
+        console.log("Creating probability bar chart with data:", probabilities);
+        const ctx = document.getElementById("probabilityChart");
+        if (!ctx) {
+            console.error("Canvas element 'probabilityChart' not found.");
+            return;
+        }
+        const chartCtx = ctx.getContext("2d");
+        
+        if (probabilityBarChart) {
+            probabilityBarChart.destroy();
+        }
+        
+        const ilrLabels = ["ILR 0", "ILR 1", "ILR 2", "ILR 3", "ILR 4"];
+
+        probabilityBarChart = new Chart(chartCtx, {
+            type: "bar",
+            data: {
+                labels: ilrLabels,
+                datasets: [{
+                    label: "Probability",
+                    data: probabilities.map(p => parseFloat((p * 100).toFixed(2))),
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Probability (%)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'ILR Level'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y + '%';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+
+    function createRadarChart(features) {
+        console.log("Creating radar chart with data:", features);
+        const ctx = document.getElementById("featureChart");
+        if (!ctx) {
+            console.error("Canvas element 'featureChart' not found.");
+            return;
+        }
+        const chartCtx = ctx.getContext("2d");
+        
+        if (featureRadarChart) {
+            featureRadarChart.destroy();
+        }
+        
+        const filteredFeatures = {};
+        for (const key in features) {
+            if (features.hasOwnProperty(key) && !key.startsWith('Probabilities_ILR_')) {
+                filteredFeatures[key] = features[key];
+            }
+        }
+        const labels = Object.keys(filteredFeatures);
+        const values = Object.values(filteredFeatures);
+
+        featureRadarChart = new Chart(chartCtx, {
+            type: "radar",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Feature Values",
+                    data: values,
+                    backgroundColor: "rgba(102, 126, 234, 0.1)",
+                    borderColor: "rgba(102, 126, 234, 0.8)",
+                    borderWidth: 2,
+                    pointBackgroundColor: "rgba(102, 126, 234, 1)",
+                    pointBorderColor: "#fff",
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    r: {
+                        angleLines: { 
+                            display: true,
+                            color: "rgba(0, 0, 0, 0.1)"
+                        },
+                        grid: {
+                            color: "rgba(0, 0, 0, 0.1)"
+                        },
+                        pointLabels: {
+                            font: {
+                                size: 11,
+                                family: "'Inter', sans-serif"
+                            },
+                            color: "#64748b"
+                        },
+                        ticks: {
+                            display: false
+                        },
+                        suggestedMin: 0,
+                    }
+                }
+            }
+        });
+    }
+
+    document.getElementById("inputText").addEventListener("keydown", function(event) {
+        if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+            event.preventDefault();
+            submitText();
+        }
+    });
+</script>
+{% endblock %}

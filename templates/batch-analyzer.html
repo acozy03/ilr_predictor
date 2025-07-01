@@ -1,0 +1,693 @@
+{% extends "layout.html" %}
+
+{% block title %}Batch Analyzer - ILR Predictor{% endblock %}
+{% block header_title %}Batch Text Analyzer{% endblock %}
+{% block subtitle %}Analyze multiple texts simultaneously for efficient processing{% endblock %}
+
+{% block extra_head %}
+<style>
+    .upload-zone {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 3px dashed #667eea;
+        border-radius: 24px;
+        padding: 60px 40px;
+        text-align: center;
+        margin-bottom: 32px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .upload-zone:hover {
+        border-color: #764ba2;
+        background: rgba(255, 255, 255, 1);
+        transform: translateY(-2px);
+    }
+    
+    .upload-zone.dragover {
+        border-color: #22c55e;
+        background: rgba(34, 197, 94, 0.05);
+    }
+    
+    .upload-icon {
+        font-size: 4rem;
+        margin-bottom: 16px;
+        opacity: 0.6;
+    }
+    
+    .text-input-area {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 32px;
+        margin-bottom: 32px;
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .text-item {
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+        position: relative;
+    }
+    
+    .text-item textarea {
+        width: 100%;
+        min-height: 80px;
+        border: none;
+        background: transparent;
+        resize: vertical;
+        font-family: inherit;
+    }
+    
+    .text-item textarea:focus {
+        outline: none;
+    }
+    
+    .remove-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+    
+    .batch-results {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 40px;
+        margin-top: 32px;
+        box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12);
+        display: none;
+    }
+    
+    .batch-results.show {
+        display: block;
+        animation: slideIn 0.5s ease;
+    }
+    
+    .result-item {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 16px;
+        border-left: 4px solid #667eea;
+    }
+    
+    .progress-bar {
+        background: #e5e7eb;
+        border-radius: 8px;
+        height: 8px;
+        margin: 16px 0;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+    
+    .export-options {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+        justify-content: center;
+    }
+    
+    /* Styles for Features and Probabilities */
+    .batch-features-section {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px dashed #e2e8f0;
+    }
+    .batch-features-section h5 {
+        font-size: 1rem;
+        color: #1f2937;
+        margin-bottom: 10px;
+    }
+    .batch-features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+    }
+    .batch-feature-item {
+        background: #e0f2fe;
+        padding: 8px;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 0.8rem;
+    }
+    .batch-feature-item div:first-child {
+        color: #0369a1;
+        font-weight: 500;
+        margin-bottom: 2px;
+    }
+    .batch-feature-item div:last-child {
+        font-weight: 600;
+        color: #0c4a6e;
+    }
+
+    .batch-chart-container {
+        margin-top: 15px;
+        height: 180px;
+        width: 100%;
+    }
+    .batch-chart-container canvas {
+        height: 100% !important; 
+        max-height: 100%; 
+        width: 100% !important; 
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+    <div class="upload-icon">📁</div>
+    <h3 style="margin-bottom: 8px; color: #1f2937;">Upload Text Files</h3>
+    <p style="color: #64748b; margin-bottom: 16px;">Drag and drop .txt files here or click to browse</p>
+    <input type="file" id="fileInput" multiple accept=".txt" style="display: none;" onchange="handleFiles(this.files)">
+    <div style="font-size: 0.9rem; color: #9ca3af;">Supports: .txt files (max 10 files)</div>
+</div>
+
+<div class="text-input-area">
+    <div class="section-title">
+        Manual Text Input
+    </div>
+    
+    <div id="textInputs">
+        <div class="text-item">
+            <textarea placeholder="Enter text #1 for batch analysis..."></textarea>
+        </div>
+    </div>
+    
+    <div style="display: flex; gap: 12px; margin-top: 16px;">
+        <button class="btn btn-secondary" onclick="addTextInput()" id="addTextBtn">
+            ➕
+        </button>
+        <button class="btn" onclick="analyzeBatch()" id="analyzeBatchBtn">
+            Analyze Batch
+        </button>
+    </div>
+</div>
+
+<div class="batch-results" id="batchResults">
+    <div class="section-title">
+       
+        Batch Analysis Results
+    </div>
+    
+    <div style="margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span>Processing Progress</span>
+            <span id="progressText">0/0</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+    
+    <div id="resultsContainer"></div>
+    
+    <div class="export-options">
+        <button class="btn" onclick="exportResults('csv')">
+            Export CSV
+        </button>
+        <button class="btn" onclick="exportResults('json')">
+            Export JSON
+        </button>
+        <button class="btn" onclick="generateReport()">
+            Generate Report
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let batchResults = [];
+let textCounter = 1;
+let isBatchAnalysisInProgress = false;
+const batchCharts = {}; 
+
+const uploadZone = document.getElementById('uploadZone');
+
+uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.classList.add('dragover');
+});
+
+uploadZone.addEventListener('dragleave', () => {
+    uploadZone.classList.remove('dragover');
+});
+
+uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+});
+
+async function handleFiles(files) {
+    if (isBatchAnalysisInProgress) {
+        alert('A batch analysis is already in progress. Please wait.');
+        return;
+    }
+
+    document.getElementById('fileInput').disabled = true;
+    document.getElementById('addTextBtn').disabled = true;
+
+    for (const file of Array.from(files)) {
+        if (file.type === 'text/plain') {
+            const reader = new FileReader();
+            await new Promise(resolve => {
+                reader.onload = (e) => {
+                    addTextInput(e.target.result, file.name);
+                    resolve();
+                };
+                reader.readAsText(file);
+            });
+        }
+    }
+    if (!isBatchAnalysisInProgress) {
+        document.getElementById('fileInput').disabled = false;
+        document.getElementById('addTextBtn').disabled = false;
+    }
+}
+
+function addTextInput(content = '', filename = '') {
+    textCounter++;
+    const container = document.getElementById('textInputs');
+    const textItem = document.createElement('div');
+    textItem.className = 'text-item';
+    textItem.innerHTML = `
+        <button class="remove-btn" onclick="removeTextInput(this)">×</button>
+        <textarea placeholder="Enter text #${textCounter} for batch analysis...">${content}</textarea>
+        ${filename ? `<div style="font-size: 0.8rem; color: #64748b; margin-top: 8px;">📄 ${filename}</div>` : ''}
+    `;
+    container.appendChild(textItem);
+}
+
+function removeTextInput(button) {
+    if (isBatchAnalysisInProgress) {
+        alert('Cannot modify texts while a batch analysis is in progress.');
+        return;
+    }
+    button.parentElement.remove();
+}
+
+async function analyzeBatch() {
+    if (isBatchAnalysisInProgress) {
+        alert('A batch analysis is already in progress. Please wait.');
+        return;
+    }
+
+    const textareas = document.querySelectorAll('#textInputs textarea');
+    const texts = Array.from(textareas).map(ta => ta.value.trim()).filter(text => text);
+    
+    if (texts.length === 0) {
+        alert('Please enter at least one text for analysis.');
+        return;
+    }
+    
+    const analyzeBtn = document.getElementById('analyzeBatchBtn');
+    const addTextBtn = document.getElementById('addTextBtn');
+    const fileInput = document.getElementById('fileInput');
+    const resultsDiv = document.getElementById('batchResults');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const resultsContainer = document.getElementById('resultsContainer');
+    
+    isBatchAnalysisInProgress = true;
+    analyzeBtn.textContent = 'Processing...';
+    analyzeBtn.disabled = true;
+    addTextBtn.disabled = true;
+    fileInput.disabled = true;
+    resultsDiv.classList.add('show');
+    resultsContainer.innerHTML = '';
+    batchResults = [];
+    progressFill.style.width = '0%';
+    progressText.textContent = '0/0';
+
+    textareas.forEach(ta => ta.disabled = true);
+    document.querySelectorAll('.remove-btn').forEach(btn => btn.disabled = true);
+
+    for (const chartId in batchCharts) {
+        if (batchCharts[chartId]) {
+            batchCharts[chartId].destroy();
+            delete batchCharts[chartId];
+        }
+    }
+    
+    try {
+   
+        const response = await fetch('/predict-batch', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ texts: texts })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            const errorDetail = data.detail || `Batch analysis failed with status ${response.status}`;
+            throw new Error(errorDetail);
+        }
+
+        if (data.results) {
+            batchResults = data.results;
+            
+            data.results.forEach((result, index) => {
+                progressText.textContent = `${index + 1}/${data.results.length}`;
+                progressFill.style.width = `${((index + 1) / data.results.length) * 100}%`;
+                
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                
+                let detailHtml = '';
+
+                // Probability Chart
+                if (result.probabilities && Array.isArray(result.probabilities) && result.probabilities.length === 5) {
+                    detailHtml += `
+                        <div class="batch-features-section">
+                            <h5>Probability Distribution:</h5>
+                            <div class="batch-chart-container">
+                                <canvas id="batch-prob-chart-${result.index}"></canvas>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (result.features && Object.keys(result.features).length > 0) {
+                    const filteredFeatures = {};
+                    for (const key in result.features) {
+                        if (result.features.hasOwnProperty(key) && !key.startsWith('Probabilities_ILR_')) {
+                            filteredFeatures[key] = result.features[key];
+                        }
+                    }
+                    if (Object.keys(filteredFeatures).length > 0) {
+                        detailHtml += `
+                            <div class="batch-features-section">
+                                <h5>Linguistic Features:</h5>
+                                <div class="batch-features-grid">
+                                    ${Object.entries(filteredFeatures).map(([key, value]) => `
+                                        <div class="batch-feature-item">
+                                            <div>${key}</div>
+                                            <div>${typeof value === 'number' ? value.toFixed(2) : (value === null ? 'N/A' : value)}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+
+                resultItem.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h4 style="color: #1f2937;">Text #${result.index + 1}</h4>
+                        ${result.error ? 
+                            `<span style="background: #ef4444; color: white; padding: 4px 12px; border-radius: 8px; font-weight: 600;">Error</span>` :
+                            `<span style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 4px 12px; border-radius: 8px; font-weight: 600;">ILR ${result.predicted_ilr}</span>`
+                        }
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+                        <em style="color: #64748b;">${result.text.substring(0, 150)}${result.text.length > 150 ? '...' : ''}</em>
+                        ${result.original_language && result.original_language !== "en" ? `<br><span style="font-size: 0.8rem; color: #64748b;">(Original: ${result.original_language.toUpperCase()})</span>` : ''}
+                        ${result.translated_text ? `<br><span style="font-size: 0.8rem; color: #64748b;">(Translated for analysis)</span>` : ''}
+                    </div>
+                    ${result.error ? `<p style="color: red; font-size: 0.9rem;">Analysis failed: ${result.error}</p>` : detailHtml}
+                `;
+                resultsContainer.appendChild(resultItem);
+
+                // Initialize charts AFTER the canvas elements are in the DOM
+                if (result.probabilities && Array.isArray(result.probabilities) && result.probabilities.length === 5) {
+                    createBatchProbabilityBarChart(`batch-prob-chart-${result.index}`, result.probabilities);
+                }
+            });
+        }
+        
+    } catch (error) {
+        console.error('Batch analysis error:', error);
+        alert(`Error processing batch: ${error.message}. Please try again.`);
+    } finally {
+        analyzeBtn.textContent = 'Analyze Batch';
+        analyzeBtn.disabled = false;
+        addTextBtn.disabled = false;
+        fileInput.disabled = false;
+
+        textareas.forEach(ta => ta.disabled = false);
+        document.querySelectorAll('.remove-btn').forEach(btn => btn.disabled = false);
+    }
+}
+
+function createBatchProbabilityBarChart(canvasId, probabilities) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) {
+        console.error(`Canvas element '${canvasId}' not found for batch probability chart.`);
+        return null;
+    }
+    const chartCtx = ctx.getContext("2d");
+
+
+    if (batchCharts[canvasId]) {
+        batchCharts[canvasId].destroy();
+    }
+    
+    const ilrLabels = ["ILR 0", "ILR 1", "ILR 2", "ILR 3", "ILR 4"];
+
+    batchCharts[canvasId] = new Chart(chartCtx, {
+        type: "bar",
+        data: {
+            labels: ilrLabels,
+            datasets: [{
+                label: "Probability",
+                data: probabilities.map(p => parseFloat((p * 100).toFixed(2))),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Probability (%)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'ILR Level'
+                    }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) { label += ': '; }
+                            if (context.parsed.y !== null) { label += context.parsed.y + '%'; }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    return batchCharts[canvasId];
+}
+
+
+function exportResults(format) {
+    if (batchResults.length === 0) {
+        alert('No results to export. Please analyze some texts first.');
+        return;
+    }
+    
+    let content, filename, mimeType;
+    
+    if (format === 'csv') {
+
+        const allFeatureKeys = new Set();
+        batchResults.forEach(item => {
+            if (item.features) {
+                for (const key in item.features) {
+                    if (item.features.hasOwnProperty(key) && !key.startsWith('Probabilities_ILR_')) {
+                        allFeatureKeys.add(key);
+                    }
+                }
+            }
+        });
+        const sortedFeatureKeys = Array.from(allFeatureKeys).sort();
+
+        const headers = ['Text #', 'ILR Level', 'Original Language', 'Translated Text (if any)'].concat(sortedFeatureKeys);
+        
+    
+        for(let i=0; i<5; i++) {
+            headers.push(`Prob_ILR_${i}`);
+        }
+
+        const rows = batchResults.map(item => {
+            const rowData = [
+                item.index + 1,
+                item.predicted_ilr,
+                item.original_language,
+                item.translated_text ? `"${item.translated_text.replace(/"/g, '""')}"` : ''
+            ];
+
+            
+            sortedFeatureKeys.forEach(key => {
+                const value = item.features ? item.features[key] : undefined;
+                rowData.push(typeof value === 'number' ? value.toFixed(2) : (value === null ? '' : value));
+            });
+
+     
+            for(let i=0; i<5; i++) {
+                const probKey = `Probabilities_ILR_${i}`;
+                const probValue = item.features ? item.features[probKey] : undefined;
+                rowData.push(typeof probValue === 'number' ? (probValue * 100).toFixed(2) : '');
+            }
+            return rowData.map(col => `"${String(col).replace(/"/g, '""')}"`).join(','); 
+        });
+        
+        content = [headers.map(h => `"${h}"`).join(','), ...rows].join('\n');
+        filename = 'batch_analysis_results.csv';
+        mimeType = 'text/csv';
+        
+    } else if (format === 'json') {
+        content = JSON.stringify(batchResults, null, 2);
+        filename = 'batch_analysis_results.json';
+        mimeType = 'application/json';
+    }
+    
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function generateReport() {
+    if (batchResults.length === 0) {
+        alert('No results to generate report. Please analyze some texts first.');
+        return;
+    }
+    
+    const successfulResults = batchResults.filter(item => !item.error);
+
+    const avgILR = successfulResults.reduce((sum, item) => sum + item.predicted_ilr, 0) / successfulResults.length;
+    const ilrDistribution = {};
+    successfulResults.forEach(item => {
+        const level = item.predicted_ilr;
+        ilrDistribution[level] = (ilrDistribution[level] || 0) + 1;
+    });
+    
+    const report = `
+# Batch Analysis Report
+
+## Summary
+- **Total Texts Submitted**: ${batchResults.length}
+- **Successfully Analyzed Texts**: ${successfulResults.length}
+- **Average ILR Level (Successful Analyses)**: ${successfulResults.length > 0 ? avgILR.toFixed(2) : 'N/A'}
+- **Analysis Date**: ${new Date().toLocaleDateString()}
+
+## ILR Level Distribution
+${Object.entries(ilrDistribution).sort(([levelA], [levelB]) => levelA - levelB).map(([level, count]) => `- Level ${level}: ${count} texts (${((count/successfulResults.length)*100).toFixed(1)}%)`).join('\n')}
+
+## Detailed Results
+${batchResults.map(item => {
+    let itemDetails = `
+### Text #${item.index + 1} - ${item.error ? `Error: ${item.error}` : `ILR Level ${item.predicted_ilr}`}
+**Original Language**: ${item.original_language.toUpperCase()}
+`;
+    if (item.translated_text) {
+        itemDetails += `**Translated Text (for analysis)**: ${item.translated_text.substring(0, 200)}...\n`;
+    }
+    itemDetails += `**Text Preview**: ${item.text.substring(0, 200)}...\n\n`;
+
+    if (!item.error) {
+     
+        let probabilitiesSection = '';
+        if (item.probabilities && Array.isArray(item.probabilities) && item.probabilities.length === 5) {
+            probabilitiesSection += `**Probabilities**: ${item.probabilities.map((p, idx) => `ILR ${idx}: ${(p * 100).toFixed(2)}%`).join(', ')}\n\n`;
+        }
+        const filteredFeatures = {};
+        if (item.features) {
+            for (const key in item.features) {
+                if (item.features.hasOwnProperty(key) && !key.startsWith('Probabilities_ILR_')) {
+                    filteredFeatures[key] = item.features[key];
+                }
+            }
+        }
+        
+        if (Object.keys(filteredFeatures).length > 0) {
+            itemDetails += probabilitiesSection; 
+            itemDetails += `**Key Linguistic Features**:\n`;
+            itemDetails += Object.entries(filteredFeatures).map(([key, value]) => 
+                `- ${key}: ${typeof value === 'number' ? value.toFixed(2) : value}`
+            ).join('\n');
+        } else if (probabilitiesSection) { 
+             itemDetails += probabilitiesSection;
+             itemDetails += `No detailed linguistic features available.\n`;
+        } else {
+             itemDetails += `No detailed features available.\n`;
+        }
+    }
+    return itemDetails;
+}).join('\n')}
+    `;
+    
+    const blob = new Blob([report], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'batch_analysis_report.md';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}
