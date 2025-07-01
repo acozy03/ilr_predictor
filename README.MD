@@ -16,6 +16,7 @@ The ILR Predictor is a deep learning-powered tool designed to analyze text compl
 - [Important Disclaimers and Limitations](#important-disclaimers-and-limitations)
 - [Credits](#credits)
 - [Visual Demo](#visual-demo)
+- [Future Student PSA](#if-you-are-a-student-contiuing-to-expand-this-project)
 
 ---
 
