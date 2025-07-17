@@ -9,6 +9,11 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from supabase import create_client, Client
 import os
 from os.path import join, dirname
@@ -21,13 +26,10 @@ import json
 from collections import Counter
 import jwt
 from functools import wraps
-import logging
+#import logger
+from logs.log_configs import logger
 import tensorflow as tf
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 tf_model_path_english = "deep_learning_models/final_model_english"
 tf_model_path_korean = "deep_learning_models/final_model_korean"
@@ -51,14 +53,14 @@ def _load_tf_model_and_tokenizer(lang_code, model_path, tokenizer_path):
             tf_models[lang_code] = tf.saved_model.load(model_path)
             logger.info(f"TensorFlow {lang_code.upper()} model loaded successfully from {model_path}")
         except Exception as e:
-            logging.error(f"Failed to load TensorFlow {lang_code.upper()} model from {model_path}: {e}")
+            logger.error(f"Failed to load TensorFlow {lang_code.upper()} model from {model_path}: {e}")
             tf_models[lang_code] = None
     if lang_code not in tf_tokenizers:
         try:
             tf_tokenizers[lang_code] = AutoTokenizer.from_pretrained(tokenizer_path)
-            logging.info(f"{lang_code.upper()} Tokenizer loaded successfully from {tokenizer_path}.")
+            logger.info(f"{lang_code.upper()} Tokenizer loaded successfully from {tokenizer_path}.")
         except Exception as e:
-            logging.error(f"Failed to load {lang_code.upper()} tokenizer from {tokenizer_path}: {e}")
+            logger.error(f"Failed to load {lang_code.upper()} tokenizer from {tokenizer_path}: {e}")
             tf_tokenizers[lang_code] = None
     return tf_models.get(lang_code), tf_tokenizers.get(lang_code)
 
@@ -80,7 +82,7 @@ def _load_spacy_nlp_pipeline(lang_code):
             spacy_nlp_pipelines[lang_code] = spacy.load(spacy_model_name)
             logger.info(f"SpaCy '{spacy_model_name}' loaded successfully for {lang_code.upper()}.")
         except Exception as e:
-            logging.error(f"Failed to load SpaCy model '{spacy_model_name}' for '{lang_code}': {e}. Please ensure it is installed (e.g., 'python -m spacy download {spacy_model_name}')")
+            logger.error(f"Failed to load SpaCy model '{spacy_model_name}' for '{lang_code}': {e}. Please ensure it is installed (e.g., 'python -m spacy download {spacy_model_name}')")
             spacy_nlp_pipelines[lang_code] = None
     return spacy_nlp_pipelines.get(lang_code)
 
@@ -94,7 +96,7 @@ def _load_m2m_translator():
             m2m_translator_model = AutoModelForSeq2SeqLM.from_pretrained(m2m_model_name)
             logger.info(f"M2M100 Translator model loaded successfully: {m2m_model_name}")
         except Exception as e:
-            logging.error(f"Failed to load M2M100 Translator model: {e}")
+            logger.error(f"Failed to load M2M100 Translator model: {e}")
             m2m_translator_tokenizer = None
             m2m_translator_model = None
     return m2m_translator_tokenizer, m2m_translator_model
@@ -112,14 +114,34 @@ embedder = SentenceTransformer("all-MiniLM-L6-v2")
 nltk.download('punkt', quiet=False, force=True)
 nltk.download('punkt_tab', quiet=False, force=True)
 
+# Initialize the limiter
+limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI()
+
+# CORS settings
+origins = [
+    "http://localhost:8000",      
+    "http://127.0.0.1:8000",      
+    # Add production domain here when deployed
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 security = HTTPBearer(auto_error=False)
 
-from langdetect import detect
+# Connect rate limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+from langdetect import detect, detect_langs
 
 MAX_CHUNK_LENGTH = 512
 def auto_translate_to_english(text: str):
@@ -143,9 +165,9 @@ def auto_translate_to_english(text: str):
         if spacy_for_segmentation and spacy_for_segmentation.has_pipe('sentencizer'): # Check for sentencizer component
             doc = spacy_for_segmentation(text)
             sentences = [sent.text for sent in doc.sents]
-            logging.info(f"SpaCy successfully segmented text for language: {lang}. Sentences found: {len(sentences)}")
+            logger.info(f"SpaCy successfully segmented text for language: {lang}. Sentences found: {len(sentences)}")
         else:
-            logging.warning(f"SpaCy pipeline for '{lang}' not available or lacks sentencizer. Falling back to basic regex segmentation for translation.")
+            logger.warning(f"SpaCy pipeline for '{lang}' not available or lacks sentencizer. Falling back to basic regex segmentation for translation.")
             import re
             sentences = re.split(r'(?<=[.!?؟\u061F\u06D4])\s+', text)
             sentences = [s.strip() for s in sentences if s.strip()]
@@ -635,10 +657,15 @@ def predict_with_tf_model(text: str, model_tf, tokenizer_tf):
 
     return predicted_ilr, probabilities.tolist()
 
+
 @app.post("/predict")
-async def predict_ilr(request: TextRequest, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user_required)):
+@limiter.limit("5/minute")
+async def predict_ilr(Text_Request: TextRequest, request: Request, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user_required)):
     logger.info(f"Predict request from user: {current_user.get('email', 'unknown')}")
-    raw_text = request.text
+    ip = request.client.host
+    logger.info(f"Received prediction request from {ip}")
+
+    raw_text = Text_Request.text
     logger.info(f"Processing text of length: {len(raw_text)}")
 
     predicted_ilr = 2
@@ -720,7 +747,6 @@ async def predict_ilr(request: TextRequest, background_tasks: BackgroundTasks, c
         user_id=current_user["user_id"],
         features_dict=features_dict # Pass complete features_dict (includes probabilities)
     )
-
     # --- IMMEDIATE RESPONSE TO FRONTEND ---
     return {
         "predicted_ilr": int(predicted_ilr),
@@ -732,11 +758,15 @@ async def predict_ilr(request: TextRequest, background_tasks: BackgroundTasks, c
     }
 
 @app.post("/predict-batch")
-def predict_batch(request: BatchTextRequest, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user_required)):
+@limiter.limit("5/minute")
+def predict_batch(Batch_Text_Request: BatchTextRequest, request: Request, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user_required)):
+    ip = request.client.host
+    logger.info(f"Received prediction request from {ip}")
+
     try:
         results = []
 
-        for i, text in enumerate(request.texts):
+        for i, text in enumerate(Batch_Text_Request.texts):
             if not text.strip():
                 continue
 
@@ -805,6 +835,7 @@ def predict_batch(request: BatchTextRequest, background_tasks: BackgroundTasks, 
                 normalized_features_for_item = {}
 
             # --- Background Storage for item ---
+            
             background_tasks.add_task(
                 store_prediction_background,
                 raw_text=text,
@@ -814,7 +845,7 @@ def predict_batch(request: BatchTextRequest, background_tasks: BackgroundTasks, 
                 user_id=current_user["user_id"],
                 features_dict=features_dict_for_item
             )
-
+            
             result = {
                 "index": i,
                 "text": text,
