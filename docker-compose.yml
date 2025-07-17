@@ -1,0 +1,8 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/sd                                       # Live-sync local project to container
+      - ./logs:/sd/logs                             # Persist logs to host machine
