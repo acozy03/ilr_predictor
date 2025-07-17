@@ -744,7 +744,7 @@ async def predict_ilr(Text_Request: TextRequest, request: Request, background_ta
         translated_text=translated_text, # Will be None if no translation occurred
         detected_lang=detected_lang,
         predicted_ilr=predicted_ilr,
-        #user_id=current_user["user_id"],
+        user_id=current_user["user_id"],
         features_dict=features_dict # Pass complete features_dict (includes probabilities)
     )
     # --- IMMEDIATE RESPONSE TO FRONTEND ---
