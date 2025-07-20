@@ -1,3 +1,4 @@
+import collections
 from fastapi import FastAPI, Request, UploadFile, File, Depends, HTTPException, status, BackgroundTasks
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
@@ -24,42 +25,72 @@ from functools import wraps
 import logging
 import tensorflow as tf
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+import asyncio # Added for run_in_executor
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# --- Model Paths (TensorFlow) ---
 tf_model_path_english = "deep_learning_models/final_model_english"
 tf_model_path_korean = "deep_learning_models/final_model_korean"
 tf_model_path_german = "deep_learning_models/final_model_german"
 
+# --- Tokenizer Paths (TensorFlow) ---
 tokenizer_path_english = "deep_learning_models/tokenizer_english"
 tokenizer_path_korean = "deep_learning_models/tokenizer_korean"
 tokenizer_path_german = "deep_learning_models/tokenizer_german"
 
-#Global Caches for Lazy-Loaded Models
-tf_models = {}
-tf_tokenizers = {}
-spacy_nlp_pipelines = {}
-m2m_translator_tokenizer = None 
+# --- Global Caches for Lazy-Loaded Models ---
+# Change tf_models to an OrderedDict for LRU behavior
+tf_models = collections.OrderedDict()
+tf_tokenizers = {} # Keep as is, or apply LRU if their memory usage is also a concern
+spacy_nlp_pipelines = {} # Keep as is, or apply LRU if their memory usage is also a concern
+m2m_translator_tokenizer = None
 m2m_translator_model = None
 
-#Helper Functions for Lazy Loading 
+# --- LRU Cache Configuration ---
+# Define the maximum number of TensorFlow models to keep in cache
+MAX_CACHED_MODELS = 2
+
+# --- Helper Functions for Lazy Loading ---
 def _load_tf_model_and_tokenizer(lang_code, model_path, tokenizer_path):
-    if lang_code not in tf_models:
+    # --- LRU Logic for tf_models ---
+    if lang_code in tf_models:
+        # If the model is already in cache, move it to the end
+        # to mark it as the most recently used.
+        tf_models.move_to_end(lang_code)
+        logger.info(f"LRU Cache: TensorFlow {lang_code.upper()} model found in cache and marked as recently used.")
+    else:
+        # If the cache is full (reached MAX_CACHED_MODELS limit),
+        # remove the least recently used item (from the beginning of OrderedDict).
+        if len(tf_models) >= MAX_CACHED_MODELS:
+            # popitem(last=False) removes the item from the beginning (LRU)
+            lru_lang_code, _ = tf_models.popitem(last=False)
+            logger.info(f"LRU Cache: Cache full. Unloading TensorFlow {lru_lang_code.upper()} model from memory.")
+            # Note: Python's garbage collector will handle memory freeing once references are gone.
+
         try:
+            # Load the new model and add it to the cache.
+            # It will automatically be added to the end (most recently used).
             tf_models[lang_code] = tf.saved_model.load(model_path)
-            logger.info(f"TensorFlow {lang_code.upper()} model loaded successfully from {model_path}")
+            logger.info(f"LRU Cache: TensorFlow {lang_code.upper()} model loaded successfully from {model_path} and added to cache.")
         except Exception as e:
-            logging.error(f"Failed to load TensorFlow {lang_code.upper()} model from {model_path}: {e}")
-            tf_models[lang_code] = None
+            logger.error(f"LRU Cache: Failed to load TensorFlow {lang_code.upper()} model from {model_path}: {e}")
+            # If loading fails, it's usually best not to cache a None or handle appropriately.
+            # For simplicity, if it fails, it's not added to the cache in this block.
+
+    # --- Tokenizer Loading (remains unchanged as per your request for models) ---
+    # You could apply a similar LRU strategy to tf_tokenizers if they become a memory bottleneck.
     if lang_code not in tf_tokenizers:
         try:
             tf_tokenizers[lang_code] = AutoTokenizer.from_pretrained(tokenizer_path)
-            logging.info(f"{lang_code.upper()} Tokenizer loaded successfully from {tokenizer_path}.")
+            logger.info(f"LRU Cache: {lang_code.upper()} Tokenizer loaded successfully from {tokenizer_path}.")
         except Exception as e:
-            logging.error(f"Failed to load {lang_code.upper()} tokenizer from {tokenizer_path}: {e}")
+            logger.error(f"LRU Cache: Failed to load {lang_code.upper()} tokenizer from {tokenizer_path}: {e}")
             tf_tokenizers[lang_code] = None
+            
+    # Return the loaded model and tokenizer (could be None if loading failed)
     return tf_models.get(lang_code), tf_tokenizers.get(lang_code)
 
 def _load_spacy_nlp_pipeline(lang_code):
@@ -80,7 +111,7 @@ def _load_spacy_nlp_pipeline(lang_code):
             spacy_nlp_pipelines[lang_code] = spacy.load(spacy_model_name)
             logger.info(f"SpaCy '{spacy_model_name}' loaded successfully for {lang_code.upper()}.")
         except Exception as e:
-            logging.error(f"Failed to load SpaCy model '{spacy_model_name}' for '{lang_code}': {e}. Please ensure it is installed (e.g., 'python -m spacy download {spacy_model_name}')")
+            logger.error(f"Failed to load SpaCy model '{spacy_model_name}' for '{lang_code}': {e}. Please ensure it is installed (e.g., 'python -m spacy download {spacy_model_name}')")
             spacy_nlp_pipelines[lang_code] = None
     return spacy_nlp_pipelines.get(lang_code)
 
@@ -94,12 +125,13 @@ def _load_m2m_translator():
             m2m_translator_model = AutoModelForSeq2SeqLM.from_pretrained(m2m_model_name)
             logger.info(f"M2M100 Translator model loaded successfully: {m2m_model_name}")
         except Exception as e:
-            logging.error(f"Failed to load M2M100 Translator model: {e}")
+            logger.error(f"Failed to load M2M100 Translator model: {e}")
             m2m_translator_tokenizer = None
             m2m_translator_model = None
     return m2m_translator_tokenizer, m2m_translator_model
 
 
+# --- Initializations (now mostly just Supabase config and light NLP tools) ---
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
@@ -116,6 +148,8 @@ nltk.download('punkt_tab', quiet=False, force=True)
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+# Security
 security = HTTPBearer(auto_error=False)
 
 from langdetect import detect
@@ -143,9 +177,9 @@ def auto_translate_to_english(text: str):
         if spacy_for_segmentation and spacy_for_segmentation.has_pipe('sentencizer'): # Check for sentencizer component
             doc = spacy_for_segmentation(text)
             sentences = [sent.text for sent in doc.sents]
-            logging.info(f"SpaCy successfully segmented text for language: {lang}. Sentences found: {len(sentences)}")
+            logger.info(f"SpaCy successfully segmented text for language: {lang}. Sentences found: {len(sentences)}")
         else:
-            logging.warning(f"SpaCy pipeline for '{lang}' not available or lacks sentencizer. Falling back to basic regex segmentation for translation.")
+            logger.warning(f"SpaCy pipeline for '{lang}' not available or lacks sentencizer. Falling back to basic regex segmentation for translation.")
             import re
             sentences = re.split(r'(?<=[.!?؟\u061F\u06D4])\s+', text)
             sentences = [s.strip() for s in sentences if s.strip()]
@@ -205,6 +239,7 @@ def auto_translate_to_english(text: str):
         print(f"Translation error (SpaCy/regex segmentation attempt): {e}")
         return text, "en"
 
+# --- Authentication and Pydantic Models (Unchanged) ---
 async def verify_token_required(credentials: HTTPAuthorizationCredentials = Depends(security)):
     logger.info("=== REQUIRED TOKEN VERIFICATION START ===")
     if not credentials:
@@ -248,6 +283,7 @@ class TextRequest(BaseModel):
 class BatchTextRequest(BaseModel):
     texts: List[str]
 
+# --- Page Routes (Unchanged) ---
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
     logger.info("Home page accessed")
@@ -290,6 +326,8 @@ def about_page(request: Request):
     logger.info("About page accessed - no backend auth required")
     return templates.TemplateResponse("about.html", {"request": request, "user": None})
 
+
+# --- API Routes (get_analytics_data, get_history_data - Unchanged) ---
 @app.get("/api/analytics-data")
 async def get_analytics_data(current_user: dict = Depends(get_current_user_required)):
     try:
@@ -387,6 +425,8 @@ async def get_history_data(
         logger.error(f"History API error: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to load history: {str(e)}")
 
+
+# --- Feature Extraction (Modified for Language Specificity and Robustness) ---
 def extract_features(text: str, lang_code: str):
     """
     Extracts linguistic features from text using language-specific SpaCy models.
@@ -395,11 +435,11 @@ def extract_features(text: str, lang_code: str):
     """
     nlp_pipeline = _load_spacy_nlp_pipeline(lang_code)
     
-
+    # Default values in case SpaCy model is not loaded or features are not available
     wc, avg_sent_len, readability, avg_word_len, ttr = 0, 0, 50, 0, 0
-    pos_ratios = [0.0] * 5
+    pos_ratios = [0.0] * 5 # NOUN, VERB, ADJ, ADV, PRON
     ner_count, parse_depth, noun_chunks_count = 0, 0, 0
-    embedding = embedder.encode([text])[0]
+    embedding = embedder.encode([text])[0] # Embedding is always attempted as SentenceTransformer is multilingual
 
     if nlp_pipeline:
         try:
@@ -409,6 +449,9 @@ def extract_features(text: str, lang_code: str):
             wc = len(tokens)
             sents = list(doc.sents)
             avg_sent_len = np.mean([len([t for t in sent if not t.is_space]) for sent in sents]) if sents else 0
+            
+            # Readability is English-specific, keep placeholder.
+            # readability = textstat.flesch_reading_ease(text) if lang_code == 'en' else 50 
             
             avg_word_len = np.mean([len(t) for t in tokens]) if tokens else 0
             ttr = len(set(tokens)) / len(tokens) if tokens else 0
@@ -420,13 +463,13 @@ def extract_features(text: str, lang_code: str):
             total_pos = sum(pos_counts.values()) or 1
             pos_ratios = [pos_counts[pos] / total_pos for pos in pos_counts]
 
-            
+            # Check if components are available before using
             if nlp_pipeline.has_pipe('ner'):
                 ner_count = len(doc.ents)
             else:
                 logger.warning(f"SpaCy 'ner' component not found for '{lang_code}'. NER count will be 0.")
 
-     
+            # Parser might not be available for all 'sm' models
             if nlp_pipeline.has_pipe('parser'): 
                 parse_depth = np.mean([abs(token.head.i - token.i) for token in doc if token.head != token]) if doc else 0
             else:
@@ -439,7 +482,7 @@ def extract_features(text: str, lang_code: str):
 
         except Exception as e:
             logger.error(f"Error during SpaCy feature extraction for '{lang_code}': {e}. Some features might be inaccurate.")
-       
+            # Keep default values assigned at the start of the function
 
     features_for_model = [wc, avg_sent_len, readability, avg_word_len, ttr, *pos_ratios, ner_count, parse_depth, noun_chunks_count, *embedding]
     
@@ -480,14 +523,15 @@ def normalize_features(features_dict):
 
     normalized_dict = {}
     for k, v in features_dict.items():
-        if k.startswith("Probabilities_ILR_"): 
+        if k.startswith("Probabilities_ILR_"): # Do not normalize probabilities, pass them through
             normalized_dict[k] = v
         elif k in max_vals and max_vals[k] != 0:
             normalized_dict[k] = min(v / max_vals[k], 1.0)
         else:
-            normalized_dict[k] = v 
+            normalized_dict[k] = v # Keep other features as is if not in max_vals or not a number
     return normalized_dict
 
+# --- Store Prediction (Unchanged, only called by background task) ---
 def store_prediction(raw_text, translated_text, language, predicted_ilr, features_dict=None, user_id=None):
     try:
         existing = supabase.table("text_data") \
@@ -539,6 +583,7 @@ def store_prediction(raw_text, translated_text, language, predicted_ilr, feature
     except Exception as e:
         print(f"Storage error: {e}")
 
+# --- Background Task (Modified to receive all data for storage) ---
 def store_prediction_background(raw_text, translated_text, detected_lang, predicted_ilr, user_id, features_dict):
     """
     Function to perform database storage in the background.
@@ -551,48 +596,39 @@ def store_prediction_background(raw_text, translated_text, detected_lang, predic
             translated_text=translated_text,
             language=detected_lang,
             predicted_ilr=predicted_ilr,
-            features_dict=features_dict, 
+            features_dict=features_dict, # Use features_dict already processed in foreground
             user_id=user_id
         )
         logger.info(f"Background DB storage completed for text: {raw_text[:50]}...")
     except Exception as e:
         logger.exception(f"Background DB storage failed for text: {raw_text[:50]} with error: {e}")
 
+# --- TensorFlow Prediction Core Logic (Unchanged) ---
 def predict_with_tf_model(text: str, model_tf, tokenizer_tf):
     if model_tf is None or tokenizer_tf is None:
         raise Exception("TensorFlow model or tokenizer not loaded for the specified language.")
 
     max_chunk_length = 256
     num_expected_chunks = 5
+    # Define the exact max length for the tokenizer to pad/truncate to
+    desired_flat_length = num_expected_chunks * max_chunk_length # This will be 1280
 
     tokenized_output = tokenizer_tf(
         text,
         return_tensors="tf",
-        padding="max_length",
-        truncation=False,
-        max_length=None
+        padding="max_length", # Pad to `max_length`
+        truncation=True,      # Crucially, set to True to truncate texts that are too long
+        max_length=desired_flat_length # Pad/truncate to exactly 1280 tokens
     )
 
     input_ids_flat = tokenized_output['input_ids'][0]
     attention_mask_flat = tokenized_output['attention_mask'][0]
 
-    total_tokens = len(input_ids_flat)
+    # After this tokenizer call, input_ids_flat and attention_mask_flat
+    # should ALWAYS have a length of `desired_flat_length` (1280).
+    # Therefore, your manual padding/truncation logic is no longer needed.
 
-    actual_num_chunks = (total_tokens + max_chunk_length - 1) // max_chunk_length
-
-    if actual_num_chunks > num_expected_chunks:
-        logger.warning(f"Text too long ({total_tokens} tokens) for {num_expected_chunks}x{max_chunk_length} input. Truncating to first {num_expected_chunks} chunks.")
-        input_ids_flat = input_ids_flat[:num_expected_chunks * max_chunk_length]
-        attention_mask_flat = attention_mask_flat[:num_expected_chunks * max_chunk_length]
-        total_tokens = len(input_ids_flat)
-        actual_num_chunks = num_expected_chunks
-    elif actual_num_chunks < num_expected_chunks:
-        padding_needed = (num_expected_chunks * max_chunk_length) - total_tokens
-        input_ids_flat = tf.pad(input_ids_flat, [[0, padding_needed]], constant_values=tokenizer_tf.pad_token_id)
-        attention_mask_flat = tf.pad(attention_mask_flat, [[0, padding_needed]], constant_values=0)
-        total_tokens = len(input_ids_flat)
-        actual_num_chunks = num_expected_chunks
-
+    # Now, reshape directly
     input_ids_reshaped = tf.reshape(input_ids_flat, [1, num_expected_chunks, max_chunk_length])
     attention_mask_reshaped = tf.reshape(attention_mask_flat, [1, num_expected_chunks, max_chunk_length])
 
@@ -626,15 +662,16 @@ def predict_with_tf_model(text: str, model_tf, tokenizer_tf):
         predicted_class_id_tensor = tf.argmax(output_tensor, axis=1)
         predicted_class_id = int(predicted_class_id_tensor.numpy().flatten()[0])
 
-        predicted_ilr = max(0, min(4, predicted_class_id))
+        predicted_ilr = int(predicted_class_id) # Assuming model outputs 0-4 for ILR 1-5
 
     except Exception as e_extract:
-        logger.error(f"Error extracting prediction or probabilities from model output: {e_extract}. Defaulting to ILR 0 and uniform probabilities.")
-        predicted_ilr = 0
+        logger.error(f"Error extracting prediction or probabilities from model output: {e_extract}. Defaulting to ILR 2 and uniform probabilities.")
+        predicted_ilr = 2 # Default to a mid-range ILR if error
         probabilities = [0.2, 0.2, 0.2, 0.2, 0.2]
 
     return predicted_ilr, probabilities.tolist()
 
+# --- Main Prediction Endpoints (Modified for New Logic) ---
 @app.post("/predict")
 async def predict_ilr(request: TextRequest, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user_required)):
     logger.info(f"Predict request from user: {current_user.get('email', 'unknown')}")
@@ -643,8 +680,8 @@ async def predict_ilr(request: TextRequest, background_tasks: BackgroundTasks, c
 
     predicted_ilr = 2
     detected_lang = "en"
-    probabilities = [0.2, 0.2, 0.2, 0.2, 0.2] 
-    translated_text = None 
+    probabilities = [0.2, 0.2, 0.2, 0.2, 0.2] # Default to uniform
+    translated_text = None # Will be populated if translation occurs
     features_dict = {}
     normalized_features = {}
 
@@ -654,12 +691,12 @@ async def predict_ilr(request: TextRequest, background_tasks: BackgroundTasks, c
         logger.warning(f"Language detection failed: {e}. Defaulting to 'en'.")
         detected_lang = "en"
 
-
     tf_model_to_use, tf_tokenizer_to_use = None, None
     text_for_tf_prediction = raw_text 
     lang_for_feature_extraction = detected_lang 
 
-    # Attempt native language TF model first
+    loop = asyncio.get_event_loop() 
+
     if detected_lang == 'en':
         tf_model_to_use, tf_tokenizer_to_use = _load_tf_model_and_tokenizer('en', tf_model_path_english, tokenizer_path_english)
     elif detected_lang == 'ko':
@@ -669,38 +706,64 @@ async def predict_ilr(request: TextRequest, background_tasks: BackgroundTasks, c
 
     if tf_model_to_use and tf_tokenizer_to_use:
         try:
-            predicted_ilr, probabilities = predict_with_tf_model(text_for_tf_prediction, tf_model_to_use, tf_tokenizer_to_use)
+   
+            predicted_ilr, probabilities = await loop.run_in_executor(
+                None, 
+                predict_with_tf_model, 
+                text_for_tf_prediction, tf_model_to_use, tf_tokenizer_to_use 
+            )
             logger.info(f"Prediction made using native TF model ({detected_lang}). ILR: {predicted_ilr}, Probs: {probabilities}")
         except Exception as e:
             logger.error(f"Native TF model prediction for {detected_lang} failed: {e}. Attempting English TF model fallback.")
-            # Fallback to English TF model if native model fails
+        
             tf_model_to_use, tf_tokenizer_to_use = _load_tf_model_and_tokenizer('en', tf_model_path_english, tokenizer_path_english)
             if tf_model_to_use and tf_tokenizer_to_use:
-                translated_text, _ = auto_translate_to_english(raw_text) # Translate for English TF fallback
-                text_for_tf_prediction = translated_text # Use translated text for English TF
-                lang_for_feature_extraction = 'en' # Features will be English-based
-                predicted_ilr, probabilities = predict_with_tf_model(text_for_tf_prediction, tf_model_to_use, tf_tokenizer_to_use)
+           
+                translated_text, _ = await loop.run_in_executor(
+                    None,
+                    auto_translate_to_english,
+                    raw_text
+                )
+                text_for_tf_prediction = translated_text
+                lang_for_feature_extraction = 'en'
+         
+                predicted_ilr, probabilities = await loop.run_in_executor(
+                    None,
+                    predict_with_tf_model,
+                    text_for_tf_prediction, tf_model_to_use, tf_tokenizer_to_use
+                )
                 logger.info(f"Prediction made using English TF model (fallback). ILR: {predicted_ilr}, Probs: {probabilities}")
             else:
                 logger.error("English TF model not available for fallback. Returning default prediction.")
-    else: # No native TF model available for detected_lang (e.g., Arabic, or models not loaded)
+    else: 
         logger.warning(f"No native TF model for '{detected_lang}'. Translating and using English TF model.")
         tf_model_to_use, tf_tokenizer_to_use = _load_tf_model_and_tokenizer('en', tf_model_path_english, tokenizer_path_english)
         if tf_model_to_use and tf_tokenizer_to_use:
-            translated_text, _ = auto_translate_to_english(raw_text) # Translate for English TF fallback
-            text_for_tf_prediction = translated_text # Use translated text for English TF
-            lang_for_feature_extraction = 'en' # Features will be English-based
-            predicted_ilr, probabilities = predict_with_tf_model(text_for_tf_prediction, tf_model_to_use, tf_tokenizer_to_use)
+      
+            translated_text, _ = await loop.run_in_executor(
+                None,
+                auto_translate_to_english,
+                raw_text
+            )
+            text_for_tf_prediction = translated_text
+            lang_for_feature_extraction = 'en'
+
+            predicted_ilr, probabilities = await loop.run_in_executor(
+                None,
+                predict_with_tf_model,
+                text_for_tf_prediction, tf_model_to_use, tf_tokenizer_to_use
+            )
             logger.info(f"Prediction made using English TF model (fallback). ILR: {predicted_ilr}, Probs: {probabilities}")
         else:
             logger.error("English TF model not available for fallback. Returning default prediction.")
 
-    # --- FOREGROUND: Feature Extraction ---
-    # Use the text that was actually fed into the TF model for prediction
-    # and the corresponding language for feature extraction.
     try:
-        _, features_dict = extract_features(text_for_tf_prediction, lang_for_feature_extraction)
-        # Add probabilities to features_dict for storage and combined display
+        _, features_dict = await loop.run_in_executor(
+            None,
+            extract_features,
+            text_for_tf_prediction, lang_for_feature_extraction
+        )
+     
         if probabilities:
             for idx, prob in enumerate(probabilities):
                 features_dict[f'Probabilities_ILR_{idx}'] = prob
@@ -710,15 +773,14 @@ async def predict_ilr(request: TextRequest, background_tasks: BackgroundTasks, c
         features_dict = {}
         normalized_features = {}
 
-    # --- BACKGROUND TASK: Database Storage ---
     background_tasks.add_task(
         store_prediction_background,
         raw_text=raw_text,
-        translated_text=translated_text, # Will be None if no translation occurred
+        translated_text=translated_text, 
         detected_lang=detected_lang,
         predicted_ilr=predicted_ilr,
         user_id=current_user["user_id"],
-        features_dict=features_dict # Pass complete features_dict (includes probabilities)
+        features_dict=features_dict 
     )
 
     # --- IMMEDIATE RESPONSE TO FRONTEND ---
@@ -732,9 +794,11 @@ async def predict_ilr(request: TextRequest, background_tasks: BackgroundTasks, c
     }
 
 @app.post("/predict-batch")
-def predict_batch(request: BatchTextRequest, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user_required)):
+async def predict_batch(request: BatchTextRequest, background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user_required)):
+    # Batch prediction now performs all steps in foreground per item, like /predict
     try:
         results = []
+        loop = asyncio.get_event_loop() # Get the event loop here for batch processing
 
         for i, text in enumerate(request.texts):
             if not text.strip():
@@ -767,16 +831,31 @@ def predict_batch(request: BatchTextRequest, background_tasks: BackgroundTasks, 
 
             if tf_model_to_use and tf_tokenizer_to_use:
                 try:
-                    predicted_ilr_for_item, probabilities_for_item = predict_with_tf_model(text_for_tf_prediction, tf_model_to_use, tf_tokenizer_to_use)
+                    # Offload prediction with native model
+                    predicted_ilr_for_item, probabilities_for_item = await loop.run_in_executor(
+                        None,
+                        predict_with_tf_model,
+                        text_for_tf_prediction, tf_model_to_use, tf_tokenizer_to_use
+                    )
                     logger.info(f"Text {i}: Prediction made using native TF model ({detected_lang_for_item}). ILR: {predicted_ilr_for_item}")
                 except Exception as e:
                     logger.error(f"Text {i}: Native TF model prediction for {detected_lang_for_item} failed: {e}. Attempting English TF model fallback.")
                     tf_model_to_use, tf_tokenizer_to_use = _load_tf_model_and_tokenizer('en', tf_model_path_english, tokenizer_path_english)
                     if tf_model_to_use and tf_tokenizer_to_use:
-                        translated_text_for_item, _ = auto_translate_to_english(text)
+                        # Offload translation
+                        translated_text_for_item, _ = await loop.run_in_executor(
+                            None,
+                            auto_translate_to_english,
+                            text
+                        )
                         text_for_tf_prediction = translated_text_for_item
                         lang_for_feature_extraction = 'en'
-                        predicted_ilr_for_item, probabilities_for_item = predict_with_tf_model(text_for_tf_prediction, tf_model_to_use, tf_tokenizer_to_use)
+                        # Offload prediction with English model
+                        predicted_ilr_for_item, probabilities_for_item = await loop.run_in_executor(
+                            None,
+                            predict_with_tf_model,
+                            text_for_tf_prediction, tf_model_to_use, tf_tokenizer_to_use
+                        )
                         logger.info(f"Text {i}: Prediction made using English TF model (fallback). ILR: {predicted_ilr_for_item}")
                     else:
                         logger.error(f"Text {i}: English TF model not available for fallback. Returning default prediction and empty features.")
@@ -784,17 +863,31 @@ def predict_batch(request: BatchTextRequest, background_tasks: BackgroundTasks, 
                 logger.warning(f"Text {i}: No native TF model for '{detected_lang_for_item}'. Translating and using English TF model.")
                 tf_model_to_use, tf_tokenizer_to_use = _load_tf_model_and_tokenizer('en', tf_model_path_english, tokenizer_path_english)
                 if tf_model_to_use and tf_tokenizer_to_use:
-                    translated_text_for_item, _ = auto_translate_to_english(text)
+                    # Offload translation
+                    translated_text_for_item, _ = await loop.run_in_executor(
+                        None,
+                        auto_translate_to_english,
+                        text
+                    )
                     text_for_tf_prediction = translated_text_for_item
                     lang_for_feature_extraction = 'en'
-                    predicted_ilr_for_item, probabilities_for_item = predict_with_tf_model(text_for_tf_prediction, tf_model_to_use, tf_tokenizer_to_use)
+                    # Offload prediction with English model
+                    predicted_ilr_for_item, probabilities_for_item = await loop.run_in_executor(
+                        None,
+                        predict_with_tf_model,
+                        text_for_tf_prediction, tf_model_to_use, tf_tokenizer_to_use
+                    )
                     logger.info(f"Text {i}: Prediction made using English TF model (fallback). ILR: {predicted_ilr_for_item}")
                 else:
                     logger.error(f"Text {i}: English TF model not available for fallback. Returning default prediction and empty features.")
 
             # --- Feature Extraction for item ---
             try:
-                _, features_dict_for_item = extract_features(text_for_tf_prediction, lang_for_feature_extraction)
+                _, features_dict_for_item = await loop.run_in_executor(
+                    None,
+                    extract_features,
+                    text_for_tf_prediction, lang_for_feature_extraction
+                )
                 if probabilities_for_item:
                     for idx, prob in enumerate(probabilities_for_item):
                         features_dict_for_item[f'Probabilities_ILR_{idx}'] = prob

@@ -14,21 +14,19 @@
     }
     
     .text-input-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
+        background: #18181b;
+        border: 1px solid #27272a;
+        border-radius: 4px;
         padding: 32px;
-        box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
     
     .comparison-results {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
+        background: #18181b;
+        border: 1px solid #27272a;
+        border-radius: 4px;
         padding: 40px;
-        box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         margin-top: 32px;
         display: none;
         animation: slideIn 0.5s ease;
@@ -44,7 +42,7 @@
         justify-content: center;
         font-size: 2rem;
         font-weight: bold;
-        color: #667eea;
+        color: #ffffff;
         margin: 20px 0;
     }
     
@@ -57,15 +55,15 @@
     }
     
     .result-card {
-        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-        border: 2px solid #0ea5e9;
-        border-radius: 16px;
+        background: #0a0a0a;
+        border: 2px solid #ffffff;
+        border-radius: 4px;
         padding: 24px;
         text-align: center;
     }
     
     .result-card.winner {
-        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        background: #0a0a0a;
         border-color: #22c55e;
         transform: scale(1.05);
     }
@@ -76,29 +74,31 @@
         gap: 16px;
         align-items: center;
         padding: 12px;
-        border-radius: 12px;
+        border-radius: 4px;
         margin-bottom: 8px;
-        background: #f8fafc;
+        background: #0a0a0a;
+        border: 1px solid #27272a;
     }
     
     .feature-bar {
         height: 8px;
         border-radius: 4px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: #ffffff;
         transition: width 0.5s ease;
     }
 
-  
+    /* Styles for probability comparison section */
     .probability-comparison-section, .linguistic-comparison-section {
-        background: white;
-        border-radius: 16px;
+        background: #0a0a0a;
+        border: 1px solid #27272a;
+        border-radius: 4px;
         padding: 24px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-        margin-top: 24px; 
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        margin-top: 24px;
     }
     .probability-comparison-section h3, .linguistic-comparison-section h3 {
         font-size: 1.5rem;
-        color: #1f2937;
+        color: #ffffff;
         margin-bottom: 20px;
         text-align: center;
     }
@@ -110,14 +110,14 @@
     .chart-panel {
         text-align: center;
     }
-    .chart-panel h4 { 
+    .chart-panel h4 {
         font-size: 1.2rem;
-        color: #374151;
+        color: #e2e8f0;
         margin-bottom: 15px;
     }
     .chart-panel canvas {
-        height: 200px !important; 
-        max-height: 100%; 
+        height: 200px !important;
+        max-height: 100%;
         width: 100% !important;
     }
 
@@ -145,20 +145,20 @@
 <div class="comparison-grid">
     <div class="text-input-card">
         <div class="section-title">
-            
+       
             Text A
         </div>
-        <textarea id="textA" placeholder="Enter first text for comparison..." style="width: 100%; min-height: 200px; padding: 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-family: inherit; resize: vertical;"></textarea>
-        <div style="text-align: right; font-size: 0.875rem; color: #6b7280; margin-top: 8px;" id="counterA">0 characters</div>
+        <textarea id="textA" placeholder="Enter first text for comparison..." style="width: 100%; min-height: 200px; padding: 16px; border: 2px solid #27272a; border-radius: 4px; font-family: inherit; resize: vertical; background: #0a0a0a; color: #e2e8f0;"></textarea>
+        <div style="text-align: right; font-size: 0.875rem; color: #a1a1aa; margin-top: 8px;" id="counterA">0 characters</div>
     </div>
     
     <div class="text-input-card">
         <div class="section-title">
-      
+            
             Text B
         </div>
-        <textarea id="textB" placeholder="Enter second text for comparison..." style="width: 100%; min-height: 200px; padding: 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-family: inherit; resize: vertical;"></textarea>
-        <div style="text-align: right; font-size: 0.875rem; color: #6b7280; margin-top: 8px;" id="counterB">0 characters</div>
+        <textarea id="textB" placeholder="Enter second text for comparison..." style="width: 100%; min-height: 200px; padding: 16px; border: 2px solid #27272a; border-radius: 4px; font-family: inherit; resize: vertical; background: #0a0a0a; color: #e2e8f0;"></textarea>
+        <div style="text-align: right; font-size: 0.875rem; color: #a1a1aa; margin-top: 8px;" id="counterB">0 characters</div>
     </div>
 </div>
 
@@ -172,23 +172,23 @@
 
 <div class="comparison-results" id="comparisonResults">
     <div class="section-title">
-     
+        <div class="section-icon">⚖️</div>
         Comparison Results
     </div>
     
     <div class="result-comparison" id="resultComparison">
         <div class="result-card" id="resultA">
-            <div style="font-size: 0.9rem; color: #0369a1; margin-bottom: 8px;">Text A - ILR Level</div>
-            <div style="font-size: 2rem; font-weight: 700; color: #0c4a6e;" id="levelA">-</div>
-            <div style="font-size: 0.8rem; color: #64748b; margin-top: 5px;" id="langA"></div>
+            <div style="font-size: 0.9rem; color: #a1a1aa; margin-bottom: 8px;">Text A - ILR Level</div>
+            <div style="font-size: 2rem; font-weight: 700; color: #ffffff;" id="levelA">-</div>
+            <div style="font-size: 0.8rem; color: #a1a1aa; margin-top: 5px;" id="langA"></div>
         </div>
         
-        <div style="font-size: 1.5rem; color: #667eea;">VS</div>
+        <div style="font-size: 1.5rem; color: #ffffff;">VS</div>
         
         <div class="result-card" id="resultB">
-            <div style="font-size: 0.9rem; color: #0369a1; margin-bottom: 8px;">Text B - ILR Level</div>
-            <div style="font-size: 2rem; font-weight: 700; color: #0c4a6e;" id="levelB">-</div>
-            <div style="font-size: 0.8rem; color: #64748b; margin-top: 5px;" id="langB"></div>
+            <div style="font-size: 0.9rem; color: #a1a1aa; margin-bottom: 8px;">Text B - ILR Level</div>
+            <div style="font-size: 2rem; font-weight: 700; color: #ffffff;" id="levelB">-</div>
+            <div style="font-size: 0.8rem; color: #a1a1aa; margin-top: 5px;" id="langB"></div>
         </div>
     </div>
     
@@ -200,9 +200,9 @@
 {% block extra_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-
-let probChartA = null; 
-let probChartB = null; 
+// Chart.js instances for comparison page
+let probChartA = null;
+let probChartB = null;
 
 document.getElementById('textA').addEventListener('input', function() {
     document.getElementById('counterA').textContent = this.value.length + ' characters';
@@ -210,6 +210,27 @@ document.getElementById('textA').addEventListener('input', function() {
 
 document.getElementById('textB').addEventListener('input', function() {
     document.getElementById('counterB').textContent = this.value.length + ' characters';
+});
+
+// Add placeholder styling for dark theme
+document.getElementById('textA').addEventListener('focus', function() {
+    this.style.borderColor = '#ffffff';
+    this.style.boxShadow = '0 0 0 1px #ffffff';
+});
+
+document.getElementById('textA').addEventListener('blur', function() {
+    this.style.borderColor = '#27272a';
+    this.style.boxShadow = 'none';
+});
+
+document.getElementById('textB').addEventListener('focus', function() {
+    this.style.borderColor = '#ffffff';
+    this.style.boxShadow = '0 0 0 1px #ffffff';
+});
+
+document.getElementById('textB').addEventListener('blur', function() {
+    this.style.borderColor = '#27272a';
+    this.style.boxShadow = 'none';
 });
 
 async function compareTexts() {
@@ -225,14 +246,12 @@ async function compareTexts() {
     compareBtn.textContent = 'Comparing...';
     compareBtn.disabled = true;
 
-
+    // Clear previous charts and detail section
     if (probChartA) probChartA.destroy(); probChartA = null;
     if (probChartB) probChartB.destroy(); probChartB = null;
     document.getElementById('comparisonDetailSection').innerHTML = '';
     
     try {
-    
-
         const headers = {
             'Content-Type': 'application/json'
         };
@@ -263,8 +282,8 @@ async function compareTexts() {
 }
 
 function displayComparison(dataA, dataB) {
-    console.log("Data A:", dataA); 
-    console.log("Data B:", dataB); 
+    console.log("Data A:", dataA);
+    console.log("Data B:", dataB);
 
     const resultsDiv = document.getElementById('comparisonResults');
     const levelA = document.getElementById('levelA');
@@ -280,7 +299,8 @@ function displayComparison(dataA, dataB) {
     levelB.textContent = dataB.predicted_ilr;
     langA.textContent = `(${dataA.original_language.toUpperCase()})`;
     langB.textContent = `(${dataB.original_language.toUpperCase()})`;
-   
+    
+    // Highlight winner
     resultA.classList.remove('winner');
     resultB.classList.remove('winner');
     
@@ -290,7 +310,7 @@ function displayComparison(dataA, dataB) {
         resultB.classList.add('winner');
     }
     
-
+    // --- Probability Comparison ---
     const hasProbabilitiesA = dataA.probabilities && Array.isArray(dataA.probabilities) && dataA.probabilities.length === 5;
     const hasProbabilitiesB = dataB.probabilities && Array.isArray(dataB.probabilities) && dataB.probabilities.length === 5;
 
@@ -317,7 +337,7 @@ function displayComparison(dataA, dataB) {
         console.warn("One or both texts lack complete probability data. Skipping probability comparison charts.");
     }
 
-  
+    // --- Linguistic Feature Comparison ---
     const hasFeaturesA = dataA.features && Object.keys(dataA.features).length > 0;
     const hasFeaturesB = dataB.features && Object.keys(dataB.features).length > 0;
 
@@ -331,8 +351,8 @@ function displayComparison(dataA, dataB) {
         console.warn("One or both texts lack complete linguistic feature data. Skipping feature comparison bars.");
         const missingFeaturesMsg = document.createElement('div');
         missingFeaturesMsg.innerHTML = `
-            <div style="background: white; border-radius: 16px; padding: 24px; margin-top: 24px; text-align: center;">
-                <p style="color: #64748b;">Linguistic features not available for comparison. This might happen if feature extraction failed for one or both texts.</p>
+            <div style="background: #0a0a0a; border: 1px solid #27272a; border-radius: 4px; padding: 24px; margin-top: 24px; text-align: center;">
+                <p style="color: #a1a1aa;">Linguistic features not available for comparison. This might happen if feature extraction failed for one or both texts.</p>
             </div>
         `;
         detailSection.appendChild(missingFeaturesMsg);
@@ -349,7 +369,7 @@ function createProbabilityBarChart(canvasId, probabilities) {
     }
     const chartCtx = ctx.getContext("2d");
 
-  
+    // Destroy existing chart if it exists
     let existingChart = (canvasId === 'probChartA') ? probChartA : probChartB;
     if (existingChart) {
         existingChart.destroy();
@@ -365,18 +385,18 @@ function createProbabilityBarChart(canvasId, probabilities) {
                 label: "Probability",
                 data: probabilities.map(p => parseFloat((p * 100).toFixed(2))),
                 backgroundColor: [
-                    'rgba(255, 99, 132, 0.7)',
-                    'rgba(54, 162, 235, 0.7)',
-                    'rgba(255, 206, 86, 0.7)',
-                    'rgba(75, 192, 192, 0.7)',
-                    'rgba(153, 102, 255, 0.7)'
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(234, 179, 8, 0.8)',
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(168, 85, 247, 0.8)'
                 ],
                 borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)'
+                    'rgba(239, 68, 68, 1)',
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(234, 179, 8, 1)',
+                    'rgba(34, 197, 94, 1)',
+                    'rgba(168, 85, 247, 1)'
                 ],
                 borderWidth: 1
             }]
@@ -384,25 +404,14 @@ function createProbabilityBarChart(canvasId, probabilities) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    title: {
-                        display: true,
-                        text: 'Probability (%)'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'ILR Level'
-                    }
-                }
-            },
             plugins: {
                 legend: { display: false },
                 tooltip: {
+                    backgroundColor: '#18181b',
+                    titleColor: '#ffffff',
+                    bodyColor: '#e2e8f0',
+                    borderColor: '#27272a',
+                    borderWidth: 1,
                     callbacks: {
                         label: function(context) {
                             let label = context.dataset.label || '';
@@ -412,13 +421,43 @@ function createProbabilityBarChart(canvasId, probabilities) {
                         }
                     }
                 }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Probability (%)',
+                        color: '#e2e8f0'
+                    },
+                    ticks: {
+                        color: '#a1a1aa'
+                    },
+                    grid: {
+                        color: '#27272a'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'ILR Level',
+                        color: '#e2e8f0'
+                    },
+                    ticks: {
+                        color: '#a1a1aa'
+                    },
+                    grid: {
+                        color: '#27272a'
+                    }
+                }
             }
         }
     });
 
     if (canvasId === 'probChartA') {
         probChartA = newChart;
-    } else { 
+    } else {
         probChartB = newChart;
     }
     return newChart;
@@ -428,42 +467,42 @@ function createFeatureComparisonBars(featuresA, featuresB, containerId) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
     
-  
+    // Get all unique feature keys from both objects, excluding probabilities
     const allFeatureKeys = new Set([
         ...Object.keys(featuresA).filter(key => !key.startsWith('Probabilities_ILR_')),
         ...Object.keys(featuresB).filter(key => !key.startsWith('Probabilities_ILR_'))
     ]);
 
-
+    // Sort features alphabetically for consistent display
     const sortedKeys = Array.from(allFeatureKeys).sort();
     
     sortedKeys.forEach(feature => {
-     
+        // Use 0 if feature is missing, or the actual value
         const valueA = featuresA[feature] !== null && featuresA[feature] !== undefined ? featuresA[feature] : 0;
         const valueB = featuresB[feature] !== null && featuresB[feature] !== undefined ? featuresB[feature] : 0;
         
-     
-        const maxValue = Math.max(valueA, valueB, 0.01); 
+        // Find max value across both texts for normalization (relative bar length)
+        const maxValue = Math.max(valueA, valueB, 0.01); // Use 0.01 to avoid division by zero if both are 0
 
         const featureDiv = document.createElement('div');
-        featureDiv.className = 'feature-comparison-row'; 
+        featureDiv.className = 'feature-comparison-row';
         featureDiv.innerHTML = `
             <div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <span style="font-size: 0.9rem; color: #374151;">${feature}</span>
-                    <span style="font-size: 0.8rem; color: #6b7280;">${typeof valueA === 'number' ? valueA.toFixed(2) : valueA}</span>
+                    <span style="font-size: 0.9rem; color: #e2e8f0;">${feature}</span>
+                    <span style="font-size: 0.8rem; color: #a1a1aa;">${typeof valueA === 'number' ? valueA.toFixed(2) : valueA}</span>
                 </div>
-                <div style="background: #e5e7eb; border-radius: 4px; height: 8px;">
+                <div style="background: #27272a; border-radius: 4px; height: 8px;">
                     <div class="feature-bar" style="width: ${(valueA / maxValue) * 100}%;"></div>
                 </div>
             </div>
-            <div style="text-align: center; font-weight: 600; color: #667eea;">VS</div>
+            <div style="text-align: center; font-weight: 600; color: #ffffff;">VS</div>
             <div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <span style="font-size: 0.9rem; color: #374151;">${feature}</span>
-                    <span style="font-size: 0.8rem; color: #6b7280;">${typeof valueB === 'number' ? valueB.toFixed(2) : valueB}</span>
+                    <span style="font-size: 0.9rem; color: #e2e8f0;">${feature}</span>
+                    <span style="font-size: 0.8rem; color: #a1a1aa;">${typeof valueB === 'number' ? valueB.toFixed(2) : valueB}</span>
                 </div>
-                <div style="background: #e5e7eb; border-radius: 4px; height: 8px;">
+                <div style="background: #27272a; border-radius: 4px; height: 8px;">
                     <div class="feature-bar" style="width: ${(valueB / maxValue) * 100}%;"></div>
                 </div>
             </div>

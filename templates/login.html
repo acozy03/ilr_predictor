@@ -15,7 +15,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0a0a0a;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -24,12 +24,11 @@
         }
 
         .login-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 4px;
             padding: 48px;
-            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
             width: 100%;
             max-width: 400px;
             text-align: center;
@@ -43,24 +42,24 @@
         .login-title {
             font-size: 2rem;
             font-weight: 700;
-            color: #1f2937;
+            color: #ffffff;
             margin-bottom: 8px;
         }
 
         .login-subtitle {
-            color: #64748b;
+            color: #a1a1aa;
             margin-bottom: 32px;
             font-size: 1rem;
         }
 
         .ucf-notice {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border: 2px solid #f59e0b;
-            border-radius: 12px;
+            background: #18181b;
+            border: 2px solid #eab308;
+            border-radius: 4px;
             padding: 16px;
             margin-bottom: 32px;
             font-size: 0.9rem;
-            color: #92400e;
+            color: #eab308;
         }
 
         .login-form {
@@ -76,7 +75,7 @@
         .form-label {
             display: block;
             font-weight: 500;
-            color: #374151;
+            color: #e2e8f0;
             margin-bottom: 8px;
             font-size: 0.95rem;
         }
@@ -84,37 +83,36 @@
         .form-input {
             width: 100%;
             padding: 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
+            border: 2px solid #27272a;
+            border-radius: 4px;
             font-size: 16px;
             font-family: inherit;
             transition: all 0.3s ease;
-            background: #fafafa;
+            background: #0a0a0a;
+            color: #e2e8f0;
         }
 
         .form-input:focus {
             outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            border-color: #ffffff;
+            box-shadow: 0 0 0 1px #ffffff;
         }
 
         .login-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
+            background: #ffffff;
+            color: #0a0a0a;
+            border: 1px solid #ffffff;
             padding: 16px 32px;
             font-size: 16px;
             font-weight: 600;
-            border-radius: 12px;
+            border-radius: 4px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
         }
 
         .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+            background: #e2e8f0;
+            border-color: #e2e8f0;
         }
 
         .login-btn:disabled {
@@ -124,22 +122,22 @@
         }
 
         .error-message {
-            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            background: #18181b;
             border: 2px solid #ef4444;
-            border-radius: 12px;
+            border-radius: 4px;
             padding: 16px;
-            color: #dc2626;
+            color: #ef4444;
             font-size: 0.9rem;
             margin-top: 16px;
             display: none;
         }
 
         .success-message {
-            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            background: #18181b;
             border: 2px solid #22c55e;
-            border-radius: 12px;
+            border-radius: 4px;
             padding: 16px;
-            color: #166534;
+            color: #22c55e;
             font-size: 0.9rem;
             margin-top: 16px;
             display: none;
@@ -156,7 +154,7 @@
             width: 20px;
             height: 20px;
             border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top: 2px solid white;
+            border-top: 2px solid #0a0a0a;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -172,14 +170,14 @@
         .auth-spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid rgba(102, 126, 234, 0.2);
-            border-top: 4px solid #667eea;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid #ffffff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
         .auth-loading-text {
-            color: #64748b;
+            color: #a1a1aa;
             font-size: 1.1rem;
             font-weight: 500;
         }
@@ -193,7 +191,7 @@
             margin: 24px 0;
             text-align: center;
             position: relative;
-            color: #9ca3af;
+            color: #71717a;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -204,24 +202,24 @@
             content: '';
             flex-grow: 1;
             height: 1px;
-            background: #e5e7eb;
+            background: #27272a;
             margin: 0 10px;
         }
 
         .divider span {
-            background: rgba(255, 255, 255, 0.95);
+            background: #18181b;
             padding: 0 8px;
             z-index: 1;
         }
 
         .signup-link {
             margin-top: 24px;
-            color: #64748b;
+            color: #a1a1aa;
             font-size: 0.9rem;
         }
 
         .signup-link a {
-            color: #667eea;
+            color: #ffffff;
             text-decoration: none;
             font-weight: 500;
         }
@@ -234,24 +232,25 @@
             position: fixed;
             top: 10px;
             left: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
+            background: #18181b;
+            color: #e2e8f0;
             padding: 10px;
-            border-radius: 8px;
+            border-radius: 4px;
             font-family: monospace;
             font-size: 12px;
             z-index: 1000;
             max-width: 300px;
+            border: 1px solid #27272a;
         }
 
- 
+        /* Modal Styles for Sign Up */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
+            background-color: rgba(0, 0, 0, 0.8);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -265,10 +264,11 @@
             visibility: visible;
         }
         .modal-content {
-            background-color: white;
+            background-color: #18181b;
+            border: 1px solid #27272a;
             padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             width: 90%;
             max-width: 450px;
             position: relative;
@@ -287,29 +287,29 @@
             border: none;
             font-size: 1.5rem;
             cursor: pointer;
-            color: #64748b;
+            color: #a1a1aa;
         }
         .modal-close-btn:hover {
-            color: #374151;
+            color: #e2e8f0;
         }
         .modal-title {
             font-size: 1.5rem;
             font-weight: 600;
-            color: #1f2937;
+            color: #ffffff;
             margin-bottom: 15px;
         }
         .modal-subtitle {
-            color: #64748b;
+            color: #a1a1aa;
             margin-bottom: 25px;
             font-size: 0.95rem;
         }
-  
+        /* Spinner within modal */
         #modalLoading .spinner {
-            border-top: 2px solid #667eea;
-            border-left-color: rgba(102, 126, 234, 0.3);
+            border-top: 2px solid #ffffff;
+            border-left-color: rgba(255, 255, 255, 0.3);
         }
         #modalLoading span {
-            color: #667eea;
+            color: #ffffff;
         }
     </style>
 </head>
@@ -321,13 +321,12 @@
         </div>
 
         <div id="loginForm" style="display: none;">
-            <div class="logo"></div>
             <h1 class="login-title">Machine Learning ILR Predictor</h1>
             <p class="login-subtitle">Sign in to access the text analysis platform</p>
             
             <div class="ucf-notice">
                 <strong>UCF Access Only</strong><br>
-                This platform is restricted to University of Central Florida users. Please use your @ucf.edu email address.
+                For user auth testing, this application only allows verified @ucf.edu email addresses
             </div>
 
             <form class="login-form" id="loginFormElement">
@@ -366,7 +365,7 @@
                 <span>or</span>
             </div>
 
-            <button class="login-btn" onclick="openSignUpModal()" id="signupModalBtn" style="background: rgba(102, 126, 234, 0.1); color: #667eea; border: 2px solid #667eea;">
+            <button class="login-btn" onclick="openSignUpModal()" id="signupModalBtn" style="background: #18181b; color: #ffffff; border: 2px solid #27272a;">
                 Request Account Verification
             </button>
 
@@ -418,10 +417,11 @@
         </div>
     </div>
 
-
     <script>
-        const supabase = window.supabase.createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-
+        const supabaseUrl = 'NEVER PUSH THESE CREDENTIALS HARDCODED';
+        const supabaseKey = 'NEVER PUSH THESE CREDENTIALS HARDCODED';
+       
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
         let currentSession = null;
 
         function showLoading(show) {
@@ -505,13 +505,12 @@
         function openSignUpModal() {
             hideSignUpMessages();
             document.getElementById('signUpModal').classList.add('show');
-            document.body.style.overflow = 'hidden'; 
+            document.body.style.overflow = 'hidden';
         }
 
         function closeSignUpModal() {
             document.getElementById('signUpModal').classList.remove('show');
-            document.body.style.overflow = ''; 
-        
+            document.body.style.overflow = '';
             document.getElementById('signUpEmail').value = '';
             document.getElementById('signUpPassword').value = '';
             hideSignUpMessages();
@@ -534,7 +533,6 @@
             }, 1500);
         }
 
-
         async function checkExistingSession() {
             showAuthLoading();
             
@@ -547,7 +545,6 @@
                 }
                 
                 if (session && session.user) {
-               
                     if (!session.user.email.endsWith('@ucf.edu')) {
                         await supabase.auth.signOut();
                         showLoginForm();
@@ -573,7 +570,6 @@
             
             console.log('Login attempt for:', email);
             
-      
             if (!validateUCFEmail(email)) {
                 showError('Please use a valid @ucf.edu email address.');
                 return;
@@ -637,7 +633,6 @@
                         showSignUpError(error.message || 'Account creation failed. Please try again.');
                     }
                 } else {
-                 
                     console.log("New user signed up successfully:", data);
                     showSignUpSuccess('Account verification email sent! Please check your UCF inbox (and spam folder) to verify your account. You can then sign in.');
                 }
@@ -650,8 +645,6 @@
             }
         });
 
-
- 
         supabase.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_IN' && session) {
                 currentSession = session;
@@ -660,7 +653,6 @@
                 showLoginForm();
             }
         });
-
 
         checkExistingSession();
     </script>

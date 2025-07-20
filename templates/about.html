@@ -7,42 +7,38 @@
 
 {% block content %}
 <style>
-  
+    /* New styles for the ILR Overview section to make cards horizontal */
     .ilr-levels-horizontal-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-        gap: 20px; 
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
     }
 
-    @media (max-width: 1024px) {
-        
-    }
     @media (max-width: 768px) {
         .ilr-levels-horizontal-grid {
-            grid-template-columns: 1fr; 
-            gap: 12px; 
+            grid-template-columns: 1fr;
+            gap: 12px;
         }
     }
 </style>
 
 <div class="content-section">
     <div class="section-title">
-  
         What is ILR?
     </div>
     
     <div class="card-content">
-        <p style="margin-bottom: 16px;">
+        <p style="margin-bottom: 16px; color: #e2e8f0;">
             The <strong>Interagency Language Roundtable (ILR)</strong> scale is a set of descriptions of abilities to communicate in a language. It is used by the U.S. government to assess language proficiency for diplomatic, military, and intelligence purposes.
         </p>
         
-        <p style="margin-bottom: 24px;">
+        <p style="margin-bottom: 24px; color: #e2e8f0;">
             This deep learning powered tool analyzes text complexity and linguistic features to predict the minimum ILR level required to understand the given text.
         </p>
 
-        <div class="card" style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border: 2px solid #0ea5e9;">
-            <div class="card-title" style="color: #0c4a6e;">How It Works</div>
-            <div class="card-content" style="color: #0369a1;">
+        <div class="card" style="background: #0a0a0a; border: 2px solid #ffffff;">
+            <div class="card-title" style="color: #ffffff;">How It Works</div>
+            <div class="card-content" style="color: #e2e8f0;">
                 <ol style="padding-left: 20px; line-height: 1.8;">
                     <li>Text preprocessing and language detection</li>
                     <li>Feature extraction (vocabulary, syntax, readability)</li>
@@ -55,55 +51,57 @@
     </div>
 </div>
 
-<div class="content-section mt-4"> <div class="section-title">
-         ILR Overview <span style="font-size: 0.9em; color: #64748b;">(Sourced from <a href="https://www.govtilr.org/" target="_blank" rel="noopener noreferrer">govtilr.org</a>)</span>
+<div class="content-section mt-4">
+    <div class="section-title">
+        ILR Overview <span style="font-size: 0.9em; color: #a1a1aa;">(Sourced from <a href="https://www.govtilr.org/" target="_blank" rel="noopener noreferrer" style="color: #ffffff;">govtilr.org</a>)</span>
     </div>
     
-    <div class="ilr-levels-horizontal-grid"> <div class="card" style="border-left: 4px solid #ef4444;">
-            <div class="card-title" style="color: #dc2626;">Level 0: No Proficiency </div>
+    <div class="ilr-levels-horizontal-grid">
+        <div class="card" style="border-left: 4px solid #ef4444;">
+            <div class="card-title" style="color: #ef4444;">Level 0: No Proficiency</div>
             <div class="card-content">No functional writing ability.</div>
         </div>
         <div class="card" style="border-left: 4px solid #ef4444;">
-            <div class="card-title" style="color: #dc2626;">Level 0+: Memorized Proficiency </div>
+            <div class="card-title" style="color: #ef4444;">Level 0+: Memorized Proficiency</div>
             <div class="card-content">Writes using memorized material and set expressions. Can produce symbols in an alphabetic or syllabic writing system or 50 of the most common characters.</div>
         </div>
         <div class="card" style="border-left: 4px solid #f59e0b;">
-            <div class="card-title" style="color: #d97706;">Level 1: Elementary Proficiency</div>
+            <div class="card-title" style="color: #f59e0b;">Level 1: Elementary Proficiency</div>
             <div class="card-content">Has sufficient control of the writing system to meet limited practical needs. Can create by writing statements and questions on topics very familiar to him/her within the scope of his/her very limited language experience.</div>
         </div>
         <div class="card" style="border-left: 4px solid #f59e0b;">
-            <div class="card-title" style="color: #d97706;">Level 1+: Elementary Proficiency, Plus</div>
+            <div class="card-title" style="color: #f59e0b;">Level 1+: Elementary Proficiency, Plus</div>
             <div class="card-content">Sufficient control of writing system to meet most survival needs and limited social demands. Can create sentences and short paragraphs related to most survival needs (food, lodging, transportation, immediate surroundings and situations) and limited social demands.</div>
         </div>
         <div class="card" style="border-left: 4px solid #f59e0b;">
-            <div class="card-title" style="color: #d97706;">Level 2: Limited Working Proficiency</div>
+            <div class="card-title" style="color: #f59e0b;">Level 2: Limited Working Proficiency</div>
             <div class="card-content">Able to write routine social correspondence and prepare documentary materials required for most limited work requirements. Has writing vocabulary sufficient to express himself/herself simply with some circumlocutions. Can write simply about a very limited number of current events or daily situations. Still makes common errors in spelling and punctuation, but shows some control of the most common formats and punctuation conventions.</div>
         </div>
-         <div class="card" style="border-left: 4px solid #f59e0b;">
-            <div class="card-title" style="color: #d97706;">Level 2+: Limited Working Proficiency, Plus</div>
+        <div class="card" style="border-left: 4px solid #f59e0b;">
+            <div class="card-title" style="color: #f59e0b;">Level 2+: Limited Working Proficiency, Plus</div>
             <div class="card-content">Shows ability to write with some precision and in some detail about most common topics. Can write about concrete topics relating to particular interests and special fields of competence. Often shows surprising fluency and ease of expression but under time constraints and pressure language may be inaccurate and/or incomprehensible.</div>
         </div>
         
         <div class="card" style="border-left: 4px solid #10b981;">
-            <div class="card-title" style="color: #059669;">Level 3: General Professional Proficiency</div>
+            <div class="card-title" style="color: #10b981;">Level 3: General Professional Proficiency</div>
             <div class="card-content">Able to use the language effectively in most formal and informal written exchanges on practical, social and professional topics. Can write reports, summaries, short library research papers on current events, on particular areas of interest or on special fields with reasonable ease.</div>
         </div>
-          <div class="card" style="border-left: 4px solid #10b981;">
-            <div class="card-title" style="color: #059669;">Level 3+: General Professional Proficiency, Plus</div>
-            <div class="card-content"> Able to write the language in a few prose styles pertinent to professional/educational needs. Not always able to tailor language to suit audience Weaknesses may he in poor control of low frequency complex structures. vocabulary or the ability to express subtleties and nuances.</div>
+        <div class="card" style="border-left: 4px solid #10b981;">
+            <div class="card-title" style="color: #10b981;">Level 3+: General Professional Proficiency, Plus</div>
+            <div class="card-content">Able to write the language in a few prose styles pertinent to professional/educational needs. Not always able to tailor language to suit audience Weaknesses may he in poor control of low frequency complex structures. vocabulary or the ability to express subtleties and nuances.</div>
         </div>
         
         <div class="card" style="border-left: 4px solid #3b82f6;">
-            <div class="card-title" style="color: #2563eb;">Level 4: Advanced Professional Proficiency</div>
+            <div class="card-title" style="color: #3b82f6;">Level 4: Advanced Professional Proficiency</div>
             <div class="card-content">Able to write the language precisely and accurately in a variety of prose styles pertinent to professional/educational needs. Errors of grammar are rare including those in low frequency complex structures. Consistently able to tailor language to suit audience and able to express subtleties and nuances.</div>
         </div>
         <div class="card" style="border-left: 4px solid #3b82f6;">
-            <div class="card-title" style="color: #2563eb;">Level 4+: Advanced Professional Proficiency, Plus</div>
+            <div class="card-title" style="color: #3b82f6;">Level 4+: Advanced Professional Proficiency, Plus</div>
             <div class="card-content">Able to write the language precisely and accurately in a wide variety of prose styles pertinent to professional/educational needs. May have some ability to edit but not in the full range of styles. Has some flexibility within a style and shows some evidence of a use of stylistic devices.</div>
         </div>
         
         <div class="card" style="border-left: 4px solid #8b5cf6;">
-            <div class="card-title" style="color: #7c3aed;">Level 5: Native/Bilingual</div>
+            <div class="card-title" style="color: #8b5cf6;">Level 5: Native/Bilingual</div>
             <div class="card-content">Has writing proficiency equal to that of a well educated native. Without non-native errors of structure, spelling, style or vocabulary can write and edit both formal and informal correspondence, official reports and documents, and professional/ educational articles including writing for special purposes which might include legal, technical, educational, literary and colloquial writing.</div>
         </div>
     </div>
@@ -111,16 +109,14 @@
 
 <div class="content-section mt-4">
     <div class="section-title">
-    
         Additional Info
     </div>
     
     <div class="grid grid-3">
-
         <div class="card">
             <div class="card-title">Typical Use Case</div>
             <div class="card-content">
-                This tool is intended to aid in the current process of the manual creation of DLPT exams, learn more about them <a href="https://www.dliflc.edu/resources/dlpt-guides/" target="_blank" >here</a>
+                This tool is intended to aid in the current process of the manual creation of DLPT exams, learn more about them <a href="https://www.dliflc.edu/resources/dlpt-guides/" target="_blank" style="color: #ffffff;">here</a>
             </div>
         </div>
         <div class="card">
@@ -133,17 +129,16 @@
         <div class="card">
             <div class="card-title">Credits</div>
             <div class="card-content">
-                This project was made with the support of the <a href="https://www.dliflc.edu" target="_blank" >DLIFLC</a> and the <a href="https://www.nsa.gov" target="_blank" >NSA</a> along with the CS department at the <a href="https://www.ucf.edu" target="_blank" >University of Central Florida</a>
+                This project was made with the support of the <a href="https://www.dliflc.edu" target="_blank" style="color: #ffffff;">DLIFLC</a> and the <a href="https://www.nsa.gov" target="_blank" style="color: #ffffff;">NSA</a> along with the CS department at the <a href="https://www.ucf.edu" target="_blank" style="color: #ffffff;">University of Central Florida</a>
             </div>
         </div>
         
         <div class="card">
-            <div class="card-title">App Documentation</div>
+            <div class="card-title">Source Code</div>
             <div class="card-content">
-                Published SD paper will go here...
+                The source code for this project is located <a href="https://github.com/acozy03/ilr_predictor" target="_blank" style="color: #ffffff;">here</a>, feel free to initate a PR with newly supported languages
             </div>
         </div>
-        
     </div>
     
     <div class="text-center mt-4">

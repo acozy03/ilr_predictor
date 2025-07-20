@@ -13,19 +13,18 @@
     }
 
     .input-section, .results-section {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
+        background: #18181b;
+        border: 1px solid #27272a;
+        border-radius: 4px;
         padding: 40px;
-        box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .input-section:hover, .results-section:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.16);
-    }
+    /* .input-section:hover, .results-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    } */
 
     .input-group {
         margin-bottom: 24px;
@@ -34,7 +33,7 @@
     label {
         display: block;
         font-weight: 500;
-        color: #374151;
+        color: #e2e8f0;
         margin-bottom: 8px;
         font-size: 0.95rem;
     }
@@ -43,53 +42,53 @@
         width: 100%;
         min-height: 200px;
         padding: 20px;
-        border: 2px solid #e5e7eb;
-        border-radius: 16px;
+        border: 2px solid #27272a;
+        border-radius: 4px;
         font-size: 16px;
         font-family: inherit;
         line-height: 1.6;
         resize: vertical;
         transition: all 0.3s ease;
-        background: #fafafa;
+        background: #0a0a0a;
+        color: #e2e8f0;
     }
 
     textarea:focus {
         outline: none;
-        border-color: #667eea;
-        background: white;
-        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        border-color: #ffffff;
+        box-shadow: 0 0 0 1px #ffffff;
     }
 
     textarea::placeholder {
-        color: #9ca3af;
+        color: #71717a;
     }
 
     .char-counter {
         text-align: right;
         font-size: 0.875rem;
-        color: #6b7280;
+        color: #a1a1aa;
         margin-top: 8px;
     }
 
     .submit-btn {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        border: none;
+        background: #ffffff;
+        color: #0a0a0a;
+        border: 1px solid #ffffff;
         padding: 16px 32px;
         font-size: 16px;
         font-weight: 600;
-        border-radius: 12px;
+        border-radius: 4px;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
         width: 100%;
         position: relative;
         overflow: hidden;
     }
 
     .submit-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+        background: #e2e8f0;
+        border-color: #e2e8f0;
+        transform: translateY(-1px);
     }
 
     .submit-btn:active {
@@ -100,6 +99,9 @@
         opacity: 0.7;
         cursor: not-allowed;
         transform: none;
+        background: #27272a;
+        border-color: #27272a;
+        color: #71717a;
     }
 
     .loading {
@@ -112,8 +114,8 @@
     .spinner {
         width: 20px;
         height: 20px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-top: 2px solid white;
+        border: 2px solid rgba(10, 10, 10, 0.3);
+        border-top: 2px solid #0a0a0a;
         border-radius: 50%;
         animation: spin 1s linear infinite;
     }
@@ -124,9 +126,9 @@
     }
 
     .prediction-result {
-        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-        border: 2px solid #0ea5e9;
-        border-radius: 16px;
+        background: #0a0a0a;
+        border: 2px solid #ffffff;
+        border-radius: 4px;
         padding: 24px;
         text-align: center;
         margin-bottom: 32px;
@@ -151,7 +153,7 @@
 
     .result-label {
         font-size: 1rem;
-        color: #0369a1;
+        color: #a1a1aa;
         font-weight: 500;
         margin-bottom: 8px;
     }
@@ -159,32 +161,32 @@
     .result-value {
         font-size: 2.5rem;
         font-weight: 700;
-        color: #0c4a6e;
+        color: #ffffff;
         margin-bottom: 8px;
     }
 
     .result-description {
         font-size: 0.9rem;
-        color: #0369a1;
+        color: #e2e8f0;
         opacity: 0.8;
     }
 
     .chart-container {
-        background: white;
-        border-radius: 16px;
+        background: #0a0a0a;
+        border: 1px solid #27272a;
+        border-radius: 4px;
         padding: 24px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         display: none;
         min-height: 250px; 
         margin-top: 20px;
     }
-  
+
     .chart-container canvas {
         height: 200px !important; 
         max-height: 100%; 
         width: 100% !important; 
     }
-
 
     .chart-container.show {
         display: block;
@@ -194,15 +196,15 @@
     .chart-title {
         font-size: 1.2rem;
         font-weight: 600;
-        color: #1f2937;
+        color: #ffffff;
         margin-bottom: 16px;
         text-align: center;
     }
 
     .error-container {
-        background: linear-gradient(135deg, #fef2f2, #fee2e2);
+        background: #18181b;
         border: 2px solid #ef4444;
-        border-radius: 16px;
+        border-radius: 4px;
         padding: 24px;
         text-align: center;
         display: none;
@@ -214,37 +216,36 @@
     }
 
     .error-text {
-        color: #dc2626;
+        color: #ef4444;
         font-weight: 500;
     }
     
-  
+    /* Global Loading Bar */
     #global-loading-bar {
         position: fixed;
         top: 0;
         left: 0;
         width: 0%;
         height: 5px;
-        background-color: #667eea;
+        background-color: #ffffff;
         z-index: 9999;
         display: none;
         transition: width 0.3s ease-out;
     }
 
     .info-message {
-        background: #e0f7fa;
-        border: 1px solid #b2ebf2;
-        border-radius: 8px;
+        background: #18181b;
+        border: 1px solid #3b82f6;
+        border-radius: 4px;
         padding: 10px 15px;
         margin-top: 20px;
         font-size: 0.9rem;
-        color: #00838f;
-        display: none; 
+        color: #3b82f6;
+        display: none;
     }
     .info-message.show {
         display: block;
     }
-
 
     @media (max-width: 1024px) {
         .content-grid {
@@ -259,15 +260,15 @@
 <div class="content-grid">
     <div class="input-section">
         <div class="section-title">
-            
+   
             Text Analysis
         </div>
         
         <div class="input-group">
-            <label for="inputText">Enter your text for analysis</label>
+           
             <textarea 
                 id="inputText" 
-                placeholder="Paste or type your text here to analyze its complexity and predict the required ILR proficiency level..."
+                placeholder="Enter text for analysis..."
                 oninput="updateCharCounter()"
             ></textarea>
             <div class="char-counter" id="charCounter">0 characters</div>
@@ -284,7 +285,7 @@
 
     <div class="results-section">
         <div class="section-title">
-          
+         
             Analysis Results
         </div>
 
@@ -295,7 +296,7 @@
         </div>
 
         <div class="chart-container" id="probabilityChartContainer">
-            <div class="chart-title">Probability Distribution</div>
+            <div class="chart-title">Confidence Chart</div>
             <canvas id="probabilityChart"></canvas> 
         </div>
         
@@ -318,14 +319,14 @@
 {% block extra_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  
+    // Flag to ensure only one prediction query runs at a time
     let isSingleQueryInProgress = false;
 
-
+    // Chart.js instances
     let featureRadarChart = null;
     let probabilityBarChart = null;
 
-   
+    // Message element
     const backgroundProcessMessage = document.getElementById('backgroundProcessMessage');
 
     function updateCharCounter() {
@@ -338,10 +339,10 @@
         const globalLoadingBar = document.getElementById('global-loading-bar');
         if (show) {
             globalLoadingBar.style.display = 'block';
-            globalLoadingBar.style.width = '20%'; 
+            globalLoadingBar.style.width = '20%';
         } else {
-            globalLoadingBar.style.width = '100%'; 
-            setTimeout(() => { 
+            globalLoadingBar.style.width = '100%';
+            setTimeout(() => {
                 globalLoadingBar.style.display = 'none';
                 globalLoadingBar.style.width = '0%';
             }, 300);
@@ -358,15 +359,15 @@
             buttonText.style.display = "none";
             loading.style.display = "flex";
             button.disabled = true;
-            inputTextarea.disabled = true; 
-            backgroundProcessMessage.classList.remove('show'); 
+            inputTextarea.disabled = true;
+            backgroundProcessMessage.classList.remove('show');
             showGlobalLoading(true);
         } else {
             buttonText.style.display = "inline";
             loading.style.display = "none";
             button.disabled = false;
-            inputTextarea.disabled = false; 
-            showGlobalLoading(false); 
+            inputTextarea.disabled = false;
+            showGlobalLoading(false);
         }
     }
 
@@ -395,16 +396,17 @@
 
         let languageInfo = `Detected language: <b>${data.original_language.toUpperCase()}</b>`;
         if (data.translated_text) {
-             languageInfo += `<br><span style="font-size: 0.9rem; color: #64748b;">(Translated to English for analysis)</span>`;
+             languageInfo += `<br><span style="font-size: 0.9rem; color: #a1a1aa;">(Translated to English for analysis)</span>`;
         }
-        resultDescription.innerHTML += `<br><span style="font-size: 0.9rem; color: #64748b;">${languageInfo}</span>`;
+        resultDescription.innerHTML += `<br><span style="font-size: 0.9rem; color: #a1a1aa;">${languageInfo}</span>`;
 
         predictionResult.classList.add("show");
         
-        
+        // Destroy any existing charts before creating new ones
         if (featureRadarChart) { featureRadarChart.destroy(); featureRadarChart = null; }
         if (probabilityBarChart) { probabilityBarChart.destroy(); probabilityBarChart = null; }
 
+        // Display probability chart
         if (data.probabilities && Array.isArray(data.probabilities) && data.probabilities.length === 5) {
             console.log("Displaying probability chart.");
             probabilityChartContainer.classList.add('show');
@@ -414,6 +416,7 @@
             probabilityChartContainer.classList.remove('show');
         }
 
+        // Display linguistic features chart
         if (data.features && Object.keys(data.features).length > 0) {
             console.log("Displaying linguistic feature chart.");
             featureChartContainer.classList.add('show');
@@ -423,7 +426,7 @@
             featureChartContainer.classList.remove('show');
         }
 
-      
+        // Display message about translation only if translation was performed
         if (data.translated_text) {
             backgroundProcessMessage.textContent = `Analysis included translation from ${data.original_language.toUpperCase()} to English.`;
             backgroundProcessMessage.classList.add('show');
@@ -469,8 +472,7 @@
         showLoading(true);
         
         try {
-        
-            const response = await fetch("http://127.0.0.1:8000/predict", {
+            const response = await fetch("/predict", {
                 method: "POST",
                 headers: { 
                     "Content-Type": "application/json"
@@ -518,18 +520,18 @@
                     label: "Probability",
                     data: probabilities.map(p => parseFloat((p * 100).toFixed(2))),
                     backgroundColor: [
-                        'rgba(255, 99, 132, 0.7)',
-                        'rgba(54, 162, 235, 0.7)',
-                        'rgba(255, 206, 86, 0.7)',
-                        'rgba(75, 192, 192, 0.7)',
-                        'rgba(153, 102, 255, 0.7)'
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(234, 179, 8, 0.8)',
+                        'rgba(34, 197, 94, 0.8)',
+                        'rgba(168, 85, 247, 0.8)'
                     ],
                     borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)'
+                        'rgba(239, 68, 68, 1)',
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(234, 179, 8, 1)',
+                        'rgba(34, 197, 94, 1)',
+                        'rgba(168, 85, 247, 1)'
                     ],
                     borderWidth: 1
                 }]
@@ -537,27 +539,16 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        title: {
-                            display: true,
-                            text: 'Probability (%)'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'ILR Level'
-                        }
-                    }
-                },
                 plugins: {
                     legend: {
                         display: false
                     },
                     tooltip: {
+                        backgroundColor: '#18181b',
+                        titleColor: '#ffffff',
+                        bodyColor: '#e2e8f0',
+                        borderColor: '#27272a',
+                        borderWidth: 1,
                         callbacks: {
                             label: function(context) {
                                 let label = context.dataset.label || '';
@@ -571,11 +562,40 @@
                             }
                         }
                     }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Probability (%)',
+                            color: '#e2e8f0'
+                        },
+                        ticks: {
+                            color: '#a1a1aa'
+                        },
+                        grid: {
+                            color: '#27272a'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'ILR Level',
+                            color: '#e2e8f0'
+                        },
+                        ticks: {
+                            color: '#a1a1aa'
+                        },
+                        grid: {
+                            color: '#27272a'
+                        }
+                    }
                 }
             }
         });
     }
-
 
     function createRadarChart(features) {
         console.log("Creating radar chart with data:", features);
@@ -606,11 +626,11 @@
                 datasets: [{
                     label: "Feature Values",
                     data: values,
-                    backgroundColor: "rgba(102, 126, 234, 0.1)",
-                    borderColor: "rgba(102, 126, 234, 0.8)",
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    borderColor: "rgba(255, 255, 255, 0.8)",
                     borderWidth: 2,
-                    pointBackgroundColor: "rgba(102, 126, 234, 1)",
-                    pointBorderColor: "#fff",
+                    pointBackgroundColor: "rgba(255, 255, 255, 1)",
+                    pointBorderColor: "#0a0a0a",
                     pointBorderWidth: 2,
                     pointRadius: 5,
                     pointHoverRadius: 7
@@ -622,23 +642,30 @@
                 plugins: {
                     legend: {
                         display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#18181b',
+                        titleColor: '#ffffff',
+                        bodyColor: '#e2e8f0',
+                        borderColor: '#27272a',
+                        borderWidth: 1
                     }
                 },
                 scales: {
                     r: {
                         angleLines: { 
                             display: true,
-                            color: "rgba(0, 0, 0, 0.1)"
+                            color: "#27272a"
                         },
                         grid: {
-                            color: "rgba(0, 0, 0, 0.1)"
+                            color: "#27272a"
                         },
                         pointLabels: {
                             font: {
                                 size: 11,
                                 family: "'Inter', sans-serif"
                             },
-                            color: "#64748b"
+                            color: "#a1a1aa"
                         },
                         ticks: {
                             display: false

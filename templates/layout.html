@@ -14,41 +14,50 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            height: 100%;
+        }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0a0a0a;
+            color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
             min-height: 100vh;
+        }
+
+        .page-wrapper {
+            flex: 1;
             padding: 20px;
-            padding-top: 60px; 
+            padding-top: 60px;
+            padding-bottom: 0;
         }
 
         .main-container {
             max-width: 1200px;
             margin: 0 auto;
-           
+            min-height: calc(100vh - 200px); /* Ensure minimum height but allow growth */
         }
 
         .header {
             text-align: center;
             margin-bottom: 40px;
             position: relative;
-            
+            border-bottom: 1px solid #27272a;
+            padding-bottom: 32px;
         }
 
         .header h1 {
             font-size: 3rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #ffffff, #f8fafc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #ffffff;
             margin-bottom: 12px;
             letter-spacing: -0.02em;
-            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .header .subtitle {
-            color: rgba(255, 255, 255, 0.9);
+            color: #a1a1aa;
             font-size: 1.2rem;
             font-weight: 400;
         }
@@ -57,11 +66,11 @@
             position: absolute;
             top: 0;
             right: 0;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 4px;
             padding: 12px 16px;
-            color: white;
+            color: #e2e8f0;
             font-size: 0.9rem;
             display: none;
             align-items: center;
@@ -72,11 +81,11 @@
             position: absolute;
             top: 0;
             right: 0;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 4px;
             padding: 12px 16px;
-            color: white;
+            color: #e2e8f0;
             font-size: 0.9rem;
             display: none;
             align-items: center;
@@ -84,142 +93,156 @@
         }
 
         .logout-btn, .login-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
+            background: #ffffff;
+            border: 1px solid #ffffff;
+            color: #0a0a0a;
             padding: 6px 12px;
-            border-radius: 8px;
+            border-radius: 2px;
             font-size: 0.8rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             text-decoration: none;
             display: inline-block;
+            font-family: inherit;
+            font-weight: 900;
         }
 
         .logout-btn:hover, .login-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: #e2e8f0;
+            border-color: #e2e8f0;
         }
 
         .navigation {
             display: flex;
             justify-content: center;
-            gap: 16px;
+            gap: 2px;
             margin-bottom: 32px;
-          
+            border: 1px solid #27272a;
+            border-radius: 4px;
+            background: #18181b;
+            padding: 4px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .nav-link {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            color: white;
+            background: transparent;
+            color: #a1a1aa;
             text-decoration: none;
-            padding: 12px 24px;
-            border-radius: 12px;
+            padding: 8px 16px;
+            border-radius: 2px;
             font-weight: 500;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+            border: none;
+            font-size: 0.9rem;
         }
 
         .nav-link:hover, .nav-link.active {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            background: #0a0a0a;
+            color: #ffffff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         }
 
         .content-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            margin-bottom: 40px; 
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 4px;
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            transition: box-shadow 0.2s ease;
+            margin-bottom: 24px;
         }
 
         .content-section:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.16);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
 
         .section-title {
             font-size: 1.5rem;
             font-weight: 600;
-            color: #1f2937;
+            color: #ffffff;
             margin-bottom: 24px;
             display: flex;
             align-items: center;
             gap: 12px;
+            border-bottom: 1px solid #27272a;
+            padding-bottom: 12px;
         }
 
         .section-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 8px;
+            width: 24px;
+            height: 24px;
+            background: #ffffff;
+            border-radius: 2px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 16px;
+            color: #0a0a0a;
+            font-size: 14px;
         }
 
         .card {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            border: 1px solid #e5e7eb;
-            transition: all 0.3s ease;
+            background: #0a0a0a;
+            border: 1px solid #27272a;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
         }
 
         .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-            background: #f1f5f9;
+            border-color: #3f3f46;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
         }
 
         .card-title {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 12px;
+            color: #ffffff;
+            margin-bottom: 8px;
         }
 
         .card-content {
-            color: #64748b;
+            color: #a1a1aa;
             line-height: 1.6;
+            font-size: 0.9rem;
         }
 
         .btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 12px;
+            background: #ffffff;
+            color: #0a0a0a;
+            border: 1px solid #ffffff;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 900;
+            border-radius: 2px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+            transition: all 0.2s ease;
             text-decoration: none;
             display: inline-block;
+            font-family: inherit;
         }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+            background: #e2e8f0;
+            border-color: #e2e8f0;
         }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #18181b;
+            color: #e2e8f0;
+            border: 1px solid #27272a;
+        }
+
+        .btn-secondary:hover {
+            background: #27272a;
+            border-color: #3f3f46;
         }
 
         .grid {
             display: grid;
-            gap: 24px;
+            gap: 20px;
         }
 
         .grid-2 {
@@ -246,89 +269,144 @@
             position: fixed;
             top: 10px;
             left: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
+            background: #18181b;
+            color: #e2e8f0;
             padding: 10px;
-            border-radius: 8px;
+            border-radius: 2px;
             font-family: monospace;
             font-size: 12px;
             z-index: 1000;
             max-width: 300px;
+            border: 1px solid #27272a;
         }
 
         .login-prompt {
             text-align: center;
             padding: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 4px;
             margin: 20px 0;
             display: none;
         }
 
         .login-prompt h2 {
-            color: white;
+            color: #ffffff;
             margin-bottom: 16px;
+            font-weight: 600;
         }
 
         .login-prompt p {
-            color: rgba(255, 255, 255, 0.8);
+            color: #a1a1aa;
             margin-bottom: 20px;
         }
 
         .login-prompt a {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
+            background: #ffffff;
+            color: #0a0a0a;
             text-decoration: none;
             padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 600;
+            border-radius: 2px;
+            font-weight: 500;
             display: inline-block;
-            transition: transform 0.3s ease;
+            transition: background-color 0.2s ease;
+            border: 1px solid #ffffff;
         }
 
         .login-prompt a:hover {
-            transform: translateY(-2px);
+            background: #e2e8f0;
+            border-color: #e2e8f0;
         }
 
+        /* Add spacing before footer */
+        .content-spacer {
+            height: 80px; /* Add space between content and footer */
+        }
+
+        /* Footer Styles */
         .site-footer {
-            margin-top: 60px; 
-            padding: 30px 20px;
-            background: rgba(0, 0, 0, 0.2);
-            color: rgba(255, 255, 255, 0.7);
+            background: #18181b;
+            border-top: 1px solid #27272a;
+            padding: 32px 20px 24px;
+            margin-top: auto; /* This pushes footer to bottom */
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 24px;
+        }
+
+        .footer-section h3 {
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #27272a;
+            padding-bottom: 8px;
+        }
+
+        .footer-section p, .footer-section li {
+            color: #a1a1aa;
             font-size: 0.85rem;
-            text-align: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-    
+            line-height: 1.5;
+            margin-bottom: 8px;
         }
-        .site-footer p {
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
-        .site-footer strong {
-            color: white;
-        }
-        .site-footer ul {
+
+        .footer-section ul {
             list-style: none;
             padding: 0;
-            margin: 10px 0;
-            display: inline-block; 
         }
-        .site-footer li {
-            margin-bottom: 5px;
+
+        .footer-section strong {
+            color: #ffffff;
         }
-        .site-footer a {
-            color: rgba(255, 255, 255, 0.9);
+
+        .footer-section a {
+            color: #ffffff;
             text-decoration: none;
             transition: color 0.2s ease;
         }
-        .site-footer a:hover {
-            color: white;
+
+        .footer-section a:hover {
+            color: #e2e8f0;
             text-decoration: underline;
         }
 
+        .footer-bottom {
+            border-top: 1px solid #27272a;
+            padding-top: 16px;
+            text-align: center;
+            color: #71717a;
+            font-size: 0.8rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: #a1a1aa;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: #ffffff;
+        }
 
         @media (max-width: 1024px) {
-            body {
+            .page-wrapper {
                 padding-top: 40px;
             }
             .header h1 {
@@ -336,7 +414,7 @@
             }
             
             .content-section {
-                padding: 32px 24px;
+                padding: 24px 20px;
             }
 
             .user-info, .login-info {
@@ -344,14 +422,17 @@
                 margin: 0 auto 20px;
                 width: fit-content;
             }
+
+            .main-container {
+                min-height: calc(100vh - 180px);
+            }
         }
 
         @media (max-width: 768px) {
-            body {
+            .page-wrapper {
                 padding-top: 20px;
-            }
-            .main-container {
-                padding: 0 16px;
+                padding: 16px;
+                padding-bottom: 0;
             }
             
             .header h1 {
@@ -363,87 +444,136 @@
             }
             
             .content-section {
-                padding: 24px 20px;
+                padding: 20px 16px;
             }
 
             .navigation {
                 flex-direction: column;
                 align-items: center;
+                width: 100%;
+                padding: 8px;
             }
 
             .nav-link {
-                width: 200px;
+                width: 100%;
                 text-align: center;
+                padding: 12px 16px;
             }
+            
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 12px;
+            }
+
             .site-footer {
-                padding: 20px 15px;
+                padding: 24px 16px 20px;
+            }
+
+            .main-container {
+                min-height: calc(100vh - 160px);
+            }
+
+            .content-spacer {
+                height: 40px; /* Reduce spacing on mobile */
             }
         }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <div class="main-container">
-        <div class="header">
-            <div class="user-info" id="userInfo">
-                <span id="userEmail">Loading...</span>
-                <button class="logout-btn" onclick="logout()">Logout</button>
+    <div class="page-wrapper">
+        <div class="main-container">
+            <div class="header">
+                <div class="user-info" id="userInfo">
+                    <span id="userEmail">Loading...</span>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+                
+                <div class="login-info" id="loginInfo">
+                    <span>Not logged in</span>
+                    <a href="/login" class="login-btn">Sign In</a>
+                </div>
+                
+                <h1>{% block header_title %}ILR Level Predictor{% endblock %}</h1>
+                <p class="subtitle">{% block subtitle %}Advanced linguistic analysis with feature visualization{% endblock %}</p>
             </div>
-            
-            <div class="login-info" id="loginInfo">
-                <span>Not logged in</span>
-                <a href="/login" class="login-btn">Sign In</a>
+
+            <nav class="navigation">
+                <a href="/" class="nav-link {% block nav_home %}{% endblock %}">Home</a>
+                <a href="/history" class="nav-link {% block nav_history %}{% endblock %}">History</a>
+                <a href="/compare" class="nav-link {% block nav_compare %}{% endblock %}">Compare</a>
+                <a href="/batch" class="nav-link {% block nav_batch %}{% endblock %}">Batch</a>
+                <a href="/analytics" class="nav-link {% block nav_analytics %}{% endblock %}">Analytics</a>
+                <a href="/about" class="nav-link {% block nav_about %}{% endblock %}">About</a>
+            </nav>
+
+            <div class="login-prompt" id="loginPrompt">
+                <h2>Authentication Required</h2>
+                <p>Please log in with your UCF credentials to access this feature.</p>
+                <a href="/login">Sign In</a>
             </div>
+
+            {% block content %}{% endblock %}
             
-            <h1>{% block header_title %}ILR Level Predictor{% endblock %}</h1>
-            <p class="subtitle">{% block subtitle %}Advanced linguistic analysis with feature visualization{% endblock %}</p>
+            <!-- Add spacing before footer -->
+            <div class="content-spacer"></div>
         </div>
-
-        <nav class="navigation">
-            <a href="/" class="nav-link {% block nav_home %}{% endblock %}">Home</a>
-            <a href="/history" class="nav-link {% block nav_history %}{% endblock %}">History</a>
-            <a href="/compare" class="nav-link {% block nav_compare %}{% endblock %}">Compare</a>
-            <a href="/batch" class="nav-link {% block nav_batch %}{% endblock %}">Batch</a>
-            <a href="/analytics" class="nav-link {% block nav_analytics %}{% endblock %}">Analytics</a>
-            <a href="/about" class="nav-link {% block nav_about %}{% endblock %}">About</a>
-        </nav>
-
-        <div class="login-prompt" id="loginPrompt">
-            <h2>Authentication Required</h2>
-            <p>Please log in with your UCF credentials to access this feature.</p>
-            <a href="/login">Sign In</a>
-        </div>
-
-        {% block content %}{% endblock %}
     </div>
 
     <footer class="site-footer">
-        <p style="font-size: 16px;">Disclaimers & Language Support:</p>
-
-        <p>This ILR Level Predictor supports direct analysis for texts in <strong>English (EN), German (DE), and Korean (KO)</strong> using <strong>specialized TensorFlow models.</strong></p>
-        <p>For all other languages, input text will be automatically translated to English using a large multilingual translation model <strong> (Facebook M2M100)</strong>. The English translation will then be <strong>analyzed by the English TensorFlow model.</strong></p>
-        <p>Linguistic features (e.g., word count, sentence length) are extracted directly from the original text if it's <strong>English, German, or Korean.</strong> If translation occurs, these features are <strong>extracted from the English translation.</strong></p>
-        <p>This tool can <strong>ONLY predict ILR levels 0-4 NOT INCLUDING '+' LABELS</strong> due to specific training data provided for supervised learning approach</p>
-        <p>Accuracy may vary for translated or mixed-language texts. <strong>This tool is for educational and experimental purposes.</strong></p>
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>Language Support</h3>
+                    <p>Direct analysis: <strong>English (EN), German (DE), Korean (KO), Arabic (AR)</strong> using specialized TensorFlow models.</p>
+                    <p>Other languages are automatically translated to English using <strong>Facebook M2M100</strong> before analysis.</p>
+                    <p>Linguistic features are extracted from original text for supported languages, or from English translation for others.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Important Disclaimers</h3>
+                    <p>This tool predicts <strong>ILR levels 0-4 only</strong> (no '+' labels) based on supervised learning training data.</p>
+                    <p>Accuracy may vary for translated or mixed-language texts.</p>
+                    <p>Developed with support from <a href="https://www.dliflc.edu" target="_blank">DLIFLC</a>, <a href="https://www.nsa.gov" target="_blank">NSA</a>, and <a href="https://www.ucf.edu" target="_blank">UCF</a>.</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="footer-links">
+                    <a href="/about">About ILR</a>
+                    <a href="https://github.com/acozy03/ilr_predictor" target="_blank">Source Code</a>
+                    <a href="https://www.govtilr.org/" target="_blank">ILR Guidelines</a>
+                    <a href="https://www.dliflc.edu/resources/dlpt-guides/" target="_blank">DLPT Resources</a>
+                </div>
+                <p>Built for educational and research purposes.</p>
+            </div>
+        </div>
     </footer>
 
     <script>
-
-        const supabase = window.supabase.createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-        
+        // Replace these with your actual Supabase credentials
+        const supabaseUrl = 'DO NOT HARDCODE CREDENTIALS IN PROD THIS IS JUST FOR LOCAL';
+        const supabaseKey = 'DO NOT HARDCODE CREDENTIALS IN PROD THIS IS JUST FOR LOCAL';
+       
+        let supabase;
         let currentSession = null;
         
-       
+        // Store original fetch BEFORE any other code
         const originalFetch = window.fetch;
         
-
+        // Get current page path
         const currentPath = window.location.pathname;
         const isHomePage = currentPath === '/';
         const isLoginPage = currentPath === '/login';
         const isProtectedPage = ['/history', '/compare', '/batch', '/analytics', '/about'].includes(currentPath);
         
         
- 
+        // Debug function
         function updateDebugInfo() {
             const authStatus = document.getElementById('authStatus');
             const debugUser = document.getElementById('debugUser');
@@ -459,17 +589,21 @@
             debugBackend.textContent = 'Page loads without auth, APIs require auth';
         }
         
-     
+        try {
+            supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+       
+        } catch (error) {
+            console.error('❌ Supabase initialization error:', error);
+        }
 
-     
+      
         function updateUI() {
             const userInfo = document.getElementById('userInfo');
             const loginInfo = document.getElementById('loginInfo');
             const loginPrompt = document.getElementById('loginPrompt');
             
             if (currentSession) {
-               
-           
+            
                 
                 userInfo.style.display = 'flex';
                 loginInfo.style.display = 'none';
@@ -477,22 +611,20 @@
                 
                 document.getElementById('userEmail').textContent = currentSession.user.email;
                 
-                
                 if (isProtectedPage) {
                     loadProtectedPageContent();
                 }
                 
             } else {
-             
-          
+    
                 
                 userInfo.style.display = 'none';
                 loginInfo.style.display = 'flex';
                 
-         
+                // Show login prompt only on protected pages
                 if (isProtectedPage) {
                     loginPrompt.style.display = 'block';
-               
+                    // Hide main content on protected pages
                     const contentSections = document.querySelectorAll('.content-section');
                     contentSections.forEach(section => {
                         section.style.display = 'none';
@@ -501,7 +633,7 @@
             }
         }
 
-      
+        // Load content for protected pages via API
         async function loadProtectedPageContent() {
             if (!currentSession) return;
             
@@ -509,20 +641,19 @@
             
             try {
                 if (currentPath === '/history') {
-          
+  
                 } else if (currentPath === '/analytics') {
                     const response = await fetch('/api/analytics-data');
                     const data = await response.json();
              
-        
+                
                 }
-         
+              
             } catch (error) {
                 console.error('❌ Error loading protected content:', error);
             }
         }
 
-  
         async function checkAuth() {
         
             
@@ -545,7 +676,7 @@
                 }
 
 
-     
+                // Check UCF email domain
                 if (!session.user.email.endsWith('@ucf.edu')) {
                 
                     alert('Access restricted to UCF email addresses only.');
@@ -555,7 +686,7 @@
                     return;
                 }
 
-             
+                // Store session globally
                 currentSession = session;
          
                 updateUI();
@@ -574,25 +705,26 @@
                 await supabase.auth.signOut();
                 currentSession = null;
                 updateUI();
-      
+                
+                // ALWAYS redirect to login page when logging out
             
                 window.location.href = '/login';
             } catch (error) {
                 console.error('Logout error:', error);
-           
+                // Force logout even if API call fails
                 currentSession = null;
                 updateUI();
- 
+                
+                // Still redirect to login page
                 window.location.href = '/login';
             }
         }
 
+        // Function to make authenticated requests
         function makeAuthenticatedRequest(url, options = {}) {
            
 
             if (!currentSession || !currentSession.access_token) {
-                console.error('No valid session found for API request');
- 
                 if (isProtectedPage || url.startsWith('/api/predict') || url.startsWith('/predict-batch') || url.startsWith('/api/history')) {
                      alert('Your session has expired or you are not logged in. Please sign in again.');
                      window.location.href = '/login';
@@ -613,14 +745,14 @@
                 ...options,
                 headers
             }).then(response => {
-                console.log('Response status:', response.status);
+                console.log('📡 Response status:', response.status);
 
                 if (response.status === 401) {
                     console.error('❌ 401 Unauthorized - token may be expired');
                     currentSession = null;
                     updateUI();
                     alert('Your session has expired. Please sign in again.');
-                    window.location.href = '/login'; 
+                    window.location.href = '/login'; // Redirect on 401
                     throw new Error('Authentication failed - 401');
                 }
 
@@ -629,7 +761,7 @@
                     currentSession = null;
                     updateUI();
                     alert('Access forbidden. Your account may not have the necessary permissions.');
-                    window.location.href = '/login'; 
+                    window.location.href = '/login'; // Redirect on 403
                     throw new Error('Access forbidden - 403');
                 }
 
@@ -640,9 +772,8 @@
             });
         }
 
-     
         window.fetch = function(url, options = {}) {
-       
+      
             let fullUrl;
             try {
                 fullUrl = new URL(url, window.location.origin);
@@ -652,7 +783,6 @@
             
             const pathname = fullUrl.pathname;
 
-        
             const protectedPaths = ['/api/', '/predict', '/predict-batch', '/upload-files'];
             const needsAuth = protectedPaths.some(path => pathname.startsWith(path));
             
@@ -664,7 +794,6 @@
             return originalFetch(url, options);
         };
 
-   
         if (supabase) {
             supabase.auth.onAuthStateChange((event, session) => {
             
@@ -678,13 +807,13 @@
                 }
             });
             
-       
+            // Check auth on page load - but don't redirect
             checkAuth();
         } else {
             console.error('❌ Supabase not initialized');
         }
 
-    
+        // Initialize
         updateDebugInfo();
         updateUI();
     </script>

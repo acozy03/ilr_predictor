@@ -8,12 +8,12 @@
 {% block extra_head %}
 <style>
     .filter-bar {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 16px;
+        background: #18181b;
+        border: 1px solid #27272a;
+        border-radius: 4px;
         padding: 20px 30px;
         margin-bottom: 32px;
-        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         display: flex;
         flex-wrap: wrap;
         gap: 20px;
@@ -30,49 +30,51 @@
     .filter-group label {
         font-size: 0.9rem;
         font-weight: 500;
-        color: #4a5568;
+        color: #e2e8f0;
     }
     .filter-bar input[type="text"], 
     .filter-bar select {
         width: 100%;
         padding: 10px 15px;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
+        border: 2px solid #27272a;
+        border-radius: 4px;
         font-size: 1rem;
-        background-color: #f8fafc;
+        background-color: #0a0a0a;
+        color: #e2e8f0;
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .filter-bar input[type="text"]:focus,
     .filter-bar select:focus {
         outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: #ffffff;
+        box-shadow: 0 0 0 1px #ffffff;
     }
     .filter-bar button {
         padding: 10px 20px;
-        border-radius: 8px;
+        border-radius: 4px;
         font-size: 1rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.2s ease;
     }
     .filter-bar button.btn-primary {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        border: none;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        background: #ffffff;
+        color: #0a0a0a;
+        border: 1px solid #ffffff;
     }
     .filter-bar button.btn-primary:hover {
+        background: #e2e8f0;
+        border-color: #e2e8f0;
         transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
     }
     .filter-bar button.btn-secondary {
-        background-color: #e2e8f0;
-        color: #4a5568;
-        border: 1px solid #cbd5e0;
+        background-color: #18181b;
+        color: #e2e8f0;
+        border: 1px solid #27272a;
     }
     .filter-bar button.btn-secondary:hover {
-        background-color: #cbd5e0;
+        background-color: #27272a;
+        border-color: #3f3f46;
     }
 
     @keyframes spin {
@@ -86,25 +88,26 @@
     }
 
     .history-card {
-        background: #f8fafc;
-        border-radius: 16px;
+        background: #18181b;
+        border: 1px solid #27272a;
+        border-radius: 4px;
         padding: 24px;
         margin-bottom: 20px;
-        border: 1px solid #e5e7eb;
         transition: all 0.3s ease;
+        cursor: pointer;
     }
 
     .history-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-        background: #f1f5f9;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        border-color: #3f3f46;
     }
 
     .features-detail {
         margin-top: 20px;
         padding-top: 20px;
-        border-top: 1px dashed #e2e8f0;
-        display: none; /* Hidden by default */
+        border-top: 1px dashed #27272a;
+        display: none;
     }
 
     .features-detail.show {
@@ -119,39 +122,40 @@
     }
 
     .feature-item {
-        background: #e0f2fe;
+        background: #0a0a0a;
+        border: 1px solid #27272a;
         padding: 10px;
-        border-radius: 8px;
+        border-radius: 4px;
         text-align: center;
         font-size: 0.85rem;
     }
 
     .feature-item div:first-child {
-        color: #0369a1;
+        color: #a1a1aa;
         font-weight: 500;
         margin-bottom: 4px;
     }
 
     .feature-item div:last-child {
         font-weight: 700;
-        color: #0c4a6e;
+        color: #ffffff;
     }
 
     .text-preview-container {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        background: #f8fafc;
+        background: #0a0a0a;
         padding: 16px;
-        border-radius: 12px;
-        border-left: 4px solid #667eea;
+        border-radius: 4px;
+        border-left: 4px solid #ffffff;
         margin-bottom: 12px;
         gap: 15px;
     }
     .text-preview-container em {
         flex: 1;
         min-width: 0;
-        color: #64748b;
+        color: #a1a1aa;
         line-height: 1.6;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -164,25 +168,25 @@
     .show-full-btn {
         flex-shrink: 0;
         padding: 8px 12px;
-        border: 1px solid #667eea;
-        background-color: white;
-        color: #667eea;
-        border-radius: 8px;
+        border: 1px solid #ffffff;
+        background-color: #18181b;
+        color: #ffffff;
+        border-radius: 4px;
         cursor: pointer;
         font-size: 0.85rem;
         white-space: nowrap;
         transition: background-color 0.2s ease, color 0.2s ease;
     }
     .show-full-btn:hover {
-        background-color: #667eea;
-        color: white;
+        background-color: #ffffff;
+        color: #0a0a0a;
     }
 
     .translated-preview-container {
-        background: #f8fafc;
+        background: #0a0a0a;
         padding: 16px;
-        border-radius: 12px;
-        border-left: 4px solid #764ba2;
+        border-radius: 4px;
+        border-left: 4px solid #a1a1aa;
         margin-top: 12px;
         display: flex;
         justify-content: space-between;
@@ -192,7 +196,7 @@
     .translated-preview-container em {
         flex: 1;
         min-width: 0;
-        color: #6b7280;
+        color: #71717a;
         line-height: 1.6;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -203,14 +207,14 @@
         word-wrap: break-word;
     }
 
-  
+    /* Modal Styles */
     .modal-overlay {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.6);
+        background-color: rgba(0, 0, 0, 0.8);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -224,10 +228,11 @@
         visibility: visible;
     }
     .modal-content {
-        background-color: white;
+        background-color: #18181b;
+        border: 1px solid #27272a;
         padding: 30px;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         max-width: 800px;
         max-height: 80vh;
         width: 90%;
@@ -248,15 +253,15 @@
         border: none;
         font-size: 1.5rem;
         cursor: pointer;
-        color: #64748b;
+        color: #a1a1aa;
     }
     .modal-close-btn:hover {
-        color: #374151;
+        color: #e2e8f0;
     }
     .modal-title {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #1f2937;
+        color: #ffffff;
         margin-bottom: 20px;
     }
     .modal-text {
@@ -265,29 +270,26 @@
         word-wrap: break-word;
         line-height: 1.6;
         font-size: 1rem;
-        color: #374151;
+        color: #e2e8f0;
         flex-grow: 1;
         overflow-y: auto;
         padding-right: 10px;
         box-sizing: border-box;
     }
-
- 
     .probability-chart-container {
         margin-top: 15px;
-        height: 200px; 
+        height: 200px;
         width: 100%;
     }
-  
     .probability-chart-container canvas {
         height: 100% !important; 
         max-height: 100%; 
         width: 100% !important; 
     }
-  
+
     .feature-radar-chart-container {
         margin-top: 15px;
-        height: 200px; 
+        height: 200px;
         width: 100%;
     }
     .feature-radar-chart-container canvas {
@@ -302,7 +304,7 @@
 {% block content %}
 <div class="content-section">
     <div class="section-title">
-        
+       
         Analysis History
     </div>
 
@@ -328,8 +330,8 @@
 
     <div id="historyLoading" class="text-center" style="padding: 60px 20px;">
         <div style="font-size: 3rem; margin-bottom: 20px;">⏳</div>
-        <h3 style="color: #64748b; margin-bottom: 16px;">Loading your history...</h3>
-        <div class="spinner" style="width: 40px; height: 40px; border: 4px solid rgba(102, 126, 234, 0.2); border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+        <h3 style="color: #a1a1aa; margin-bottom: 16px;">Loading your history...</h3>
+        <div class="spinner" style="width: 40px; height: 40px; border: 4px solid rgba(255, 255, 255, 0.2); border-top: 4px solid #ffffff; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
     </div>
 
     <div id="historyContent" style="display: none;">
@@ -340,7 +342,7 @@
             <button class="btn" id="loadMoreBtn" style="display: none;">
                 ⬇Load More
             </button>
-            <span id="noMoreHistory" style="display: none; color: #64748b;">No more history entries.</span>
+            <span id="noMoreHistory" style="display: none; color: #a1a1aa;">No more historical entries.</span>
         </div>
 
         <div class="text-center mt-4">
@@ -351,9 +353,8 @@
     </div>
 
     <div id="historyEmpty" class="text-center" style="padding: 60px 20px; display: none;">
-        <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.3;">📊</div>
-        <h3 style="color: #64748b; margin-bottom: 16px;">No submission history found for these filters.</h3>
-        <p style="color: #9ca3af; margin-bottom: 32px;">Adjust your filters or analyze new texts.</p>
+        <h3 style="color: #a1a1aa; margin-bottom: 16px;">No submission history found for these filters.</h3>
+        <p style="color: #71717a; margin-bottom: 32px;">Adjust your filters or analyze new texts.</p>
         <button onclick="resetFilters()" class="btn">
             Show All History
         </button>
@@ -362,7 +363,7 @@
     <div id="historyError" class="text-center" style="padding: 60px 20px; display: none;">
         <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.3;">❌</div>
         <h3 style="color: #ef4444; margin-bottom: 16px;">Error loading history</h3>
-        <p style="color: #9ca3af; margin-bottom: 32px;" id="errorMessage">Please try again later.</p>
+        <p style="color: #71717a; margin-bottom: 32px;" id="errorMessage">Please try again later.</p>
         <button onclick="loadHistory(true)" class="btn">
             Retry
         </button>
@@ -404,7 +405,6 @@ const modalTitle = document.getElementById('modalTitle');
 const modalTextContent = document.getElementById('modalTextContent');
 
 const loadedRecords = {};
-
 
 function debounce(func, delay) {
     let timeout;
@@ -458,11 +458,10 @@ async function loadHistory(reset = false) {
         showState('loading');
     } else {
         loadMoreBtn.disabled = true;
-        loadMoreBtn.innerHTML = '<span>🔄 Loading...</span>';
+        loadMoreBtn.innerHTML = '<span>Loading...</span>';
     }
 
     try {
-       
         let url = `/api/history?limit=${limit}&offset=${currentOffset}`;
         if (currentSearchQuery) {
             url += `&search_query=${encodeURIComponent(currentSearchQuery)}`;
@@ -515,7 +514,7 @@ async function loadHistory(reset = false) {
     } finally {
         isLoading = false;
         loadMoreBtn.disabled = false;
-        loadMoreBtn.innerHTML = '⬇️ Load More';
+        loadMoreBtn.innerHTML = 'Load More';
     }
 }
 
@@ -537,14 +536,14 @@ function appendHistory(historyData) {
         const translatedTextPreview = needsTranslatedFullButton ? translatedText.substring(0, 250) + '...' : translatedText;
         
         card.innerHTML = `
-            <div style="font-size: 1.2rem; font-weight: 600; color: #1f2937; margin-bottom: 12px;">
-                <span style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 4px 12px; border-radius: 8px; font-size: 0.9rem; margin-right: 12px;">
+            <div style="font-size: 1.2rem; font-weight: 600; color: #ffffff; margin-bottom: 12px;">
+                <span style="background: #ffffff; color: #0a0a0a; padding: 4px 12px; border-radius: 4px; font-size: 0.9rem; margin-right: 12px;">
                     ILR ${record.predicted_ilr_level || 'N/A'}
                 </span>
-                <span style="color: #64748b; font-size: 0.9rem;">${record.language || 'Unknown'}</span>
+                <span style="color: #a1a1aa; font-size: 0.9rem;">${record.language || 'Unknown'}</span>
             </div>
             
-            <div style="color: #64748b; line-height: 1.6;">
+            <div style="color: #a1a1aa; line-height: 1.6;">
                 <div style="margin-bottom: 12px;">
                     <strong>Timestamp:</strong> 
                     <span>${timestamp}</span>
@@ -639,7 +638,7 @@ function toggleFeatures(cardElement, features) {
     const featuresDetailDiv = cardElement.querySelector('.features-detail');
     
     const cardId = cardElement.querySelector('[id^="features-detail-"]').id.replace('features-detail-', '');
-   
+    // Destroy existing chart for this card if it exists
     if (historyCharts[cardId]) {
         historyCharts[cardId].destroy();
         delete historyCharts[cardId];
@@ -664,9 +663,10 @@ function toggleFeatures(cardElement, features) {
         }
 
         if (hasAllProbs && probabilities.length === 5) {
-          
+            // Display Probability Chart
             const probChartHeader = document.createElement('h5');
             probChartHeader.textContent = 'Probability Distribution:';
+            probChartHeader.style.color = '#ffffff';
             featuresDetailDiv.appendChild(probChartHeader);
 
             const probChartContainer = document.createElement('div');
@@ -687,18 +687,18 @@ function toggleFeatures(cardElement, features) {
                         label: 'Probability',
                         data: probabilities.map(p => (p * 100).toFixed(2)),
                         backgroundColor: [
-                            'rgba(255, 99, 132, 0.7)',
-                            'rgba(54, 162, 235, 0.7)',
-                            'rgba(255, 206, 86, 0.7)',
-                            'rgba(75, 192, 192, 0.7)',
-                            'rgba(153, 102, 255, 0.7)'
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(234, 179, 8, 0.8)',
+                            'rgba(34, 197, 94, 0.8)',
+                            'rgba(168, 85, 247, 0.8)'
                         ],
                         borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)'
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(234, 179, 8, 1)',
+                            'rgba(34, 197, 94, 1)',
+                            'rgba(168, 85, 247, 1)'
                         ],
                         borderWidth: 1
                     }]
@@ -706,25 +706,14 @@ function toggleFeatures(cardElement, features) {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: {
-                                display: true,
-                                text: 'Probability (%)'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'ILR Level'
-                            }
-                        }
-                    },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
+                            backgroundColor: '#18181b',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e2e8f0',
+                            borderColor: '#27272a',
+                            borderWidth: 1,
                             callbacks: {
                                 label: function(context) {
                                     let label = context.dataset.label || '';
@@ -732,6 +721,36 @@ function toggleFeatures(cardElement, features) {
                                     if (context.parsed.y !== null) { label += context.parsed.y + '%'; }
                                     return label;
                                 }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Probability (%)',
+                                color: '#e2e8f0'
+                            },
+                            ticks: {
+                                color: '#a1a1aa'
+                            },
+                            grid: {
+                                color: '#27272a'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'ILR Level',
+                                color: '#e2e8f0'
+                            },
+                            ticks: {
+                                color: '#a1a1aa'
+                            },
+                            grid: {
+                                color: '#27272a'
                             }
                         }
                     }
@@ -742,12 +761,13 @@ function toggleFeatures(cardElement, features) {
             console.log("No valid probabilities for history card. Skipping probability chart.");
         }
 
- 
+        // Display Linguistic Features
         const featuresGridDiv = document.createElement('div');
         featuresGridDiv.className = 'features-grid';
         
         const linguisticFeaturesHeader = document.createElement('h5');
         linguisticFeaturesHeader.textContent = 'Detailed Linguistic Features:';
+        linguisticFeaturesHeader.style.color = '#ffffff';
         featuresDetailDiv.appendChild(linguisticFeaturesHeader);
         featuresDetailDiv.appendChild(featuresGridDiv);
 
@@ -770,16 +790,20 @@ function toggleFeatures(cardElement, features) {
                     }
                 }
             } else {
-                featuresGridDiv.innerHTML = '<p style="color: #9ca3af; text-align: center;">No linguistic features available for this entry.</p>';
+                featuresGridDiv.innerHTML = '<p style="color: #71717a; text-align: center;">No linguistic features available for this entry.</p>';
             }
         } else {
-            featuresGridDiv.innerHTML = '<p style="color: #9ca3af; text-align: center;">No detailed features available for this entry.</p>';
+            featuresGridDiv.innerHTML = '<p style="color: #71717a; text-align: center;">No detailed features available for this entry.</p>';
         }
 
         featuresDetailDiv.classList.add('show');
     }
 }
 
+function showErrorState(message) {
+    errorMessageDiv.textContent = message;
+    showState('error');
+}
 
 function escapeHtml(text) {
     const div = document.createElement('div');

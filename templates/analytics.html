@@ -14,42 +14,38 @@
     }
     
     .stat-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 16px;
+        background: #18181b;
+        border: 1px solid #27272a;
+        border-radius: 4px;
         padding: 24px;
         text-align: center;
-        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         transition: transform 0.3s ease;
     }
     
     .stat-card:hover {
-        transform: translateY(-4px);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     }
     
     .stat-number {
         font-size: 2.5rem;
         font-weight: 700;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: #ffffff;
         margin-bottom: 8px;
     }
     
     .stat-label {
-        color: #64748b;
+        color: #a1a1aa;
         font-weight: 500;
     }
     
     .chart-section {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
+        background: #18181b;
+        border: 1px solid #27272a;
+        border-radius: 4px;
         padding: 40px;
-        box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         margin-bottom: 32px;
     }
     
@@ -83,35 +79,35 @@
         align-items: center;
         height: 200px;
         font-size: 1.2rem;
-        color: #64748b;
+        color: #a1a1aa;
     }
     
     .error-message {
-        background: linear-gradient(135deg, #fef2f2, #fee2e2);
+        background: #18181b;
         border: 2px solid #ef4444;
-        border-radius: 16px;
+        border-radius: 4px;
         padding: 24px;
         text-align: center;
-        color: #dc2626;
+        color: #ef4444;
         margin: 20px 0;
     }
     
     .insight-card {
-        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-        border: 2px solid #0ea5e9;
-        border-radius: 16px;
+        background: #0a0a0a;
+        border: 2px solid #ffffff;
+        border-radius: 4px;
         padding: 20px;
         margin-bottom: 16px;
     }
     
     .insight-title {
         font-weight: 600;
-        color: #0c4a6e;
+        color: #ffffff;
         margin-bottom: 8px;
     }
     
     .insight-desc {
-        color: #0369a1;
+        color: #e2e8f0;
         font-size: 0.9rem;
         line-height: 1.5;
     }
@@ -139,7 +135,7 @@
 
 {% block content %}
 <div id="loadingIndicator" class="loading-spinner">
-   
+    Loading analytics data...
 </div>
 
 <div id="analyticsContent" style="display: none;">
@@ -163,7 +159,7 @@
             <div class="stat-number" id="thisWeek">0</div>
             <div class="stat-label">This Week</div>
             <div class="trend-indicator trend-up" id="weeklyTrend">
-                ↗️ Recent Activity
+                Recent Activity
             </div>
         </div>
     </div>
@@ -171,7 +167,6 @@
     <div class="grid grid-2">
         <div class="chart-section">
             <div class="section-title">
-            
                 ILR Level Distribution
             </div>
             <div class="chart-container">
@@ -181,7 +176,6 @@
         
         <div class="chart-section">
             <div class="section-title">
-               
                 Language Distribution
             </div>
             <div class="chart-container">
@@ -192,25 +186,23 @@
 
     <div class="chart-section">
         <div class="section-title">
-        
             Analysis Timeline
         </div>
         <div class="timeline-chart-container">
             <canvas id="timelineChart"></canvas>
         </div>
     </div>
-
-
 </div>
 
 <div id="errorContainer" class="error-message" style="display: none;">
-    <div>❌ Unable to load analytics data</div>
+    <div>Unable to load analytics data</div>
     <div style="font-size: 0.9rem; margin-top: 8px;">Please check your connection and try refreshing the page.</div>
-    <button class="btn" onclick="loadAnalyticsData()" style="margin-top: 16px;">🔄 Retry</button>
+    <button class="btn" onclick="loadAnalyticsData()" style="margin-top: 16px;">Retry</button>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 let chartInstances = {};
 let isLoading = false;
@@ -223,7 +215,7 @@ async function loadAnalyticsData() {
     const analyticsContent = document.getElementById('analyticsContent');
     const errorContainer = document.getElementById('errorContainer');
     
-
+    // Show loading state
     loadingIndicator.style.display = 'flex';
     analyticsContent.style.display = 'none';
     errorContainer.style.display = 'none';
@@ -237,23 +229,23 @@ async function loadAnalyticsData() {
         
         const analyticsData = await response.json();
         
-      
+        // Update stats
         document.getElementById('totalAnalyses').textContent = analyticsData.totalAnalyses || 0;
         document.getElementById('avgILR').textContent = (analyticsData.avgILR || 0).toFixed(1);
         document.getElementById('languagesCount').textContent = analyticsData.languagesCount || 0;
         document.getElementById('thisWeek').textContent = analyticsData.thisWeek || 0;
         
-     
+        // Create charts with real data
         await createCharts(analyticsData);
         
-  
+        // Show content
         loadingIndicator.style.display = 'none';
         analyticsContent.style.display = 'block';
         
     } catch (error) {
         console.error('Error loading analytics:', error);
         
-   
+        // Show error state
         loadingIndicator.style.display = 'none';
         errorContainer.style.display = 'block';
     } finally {
@@ -270,25 +262,25 @@ function destroyChart(chartId) {
 
 async function createCharts(analyticsData) {
     try {
-     
+        // Destroy existing charts
         Object.keys(chartInstances).forEach(destroyChart);
         
         // Wait a bit for DOM to settle
         await new Promise(resolve => setTimeout(resolve, 50));
         
-
+        // Create ILR Distribution Chart
         const ilrCanvas = document.getElementById('ilrChart');
         if (ilrCanvas) {
             const ilrCtx = ilrCanvas.getContext('2d');
             chartInstances.ilrChart = new Chart(ilrCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'],
+                    labels: ['Level 1', 'Level 2', 'Level 3', 'Level 4'],
                     datasets: [{
-                        data: analyticsData.ilrDistribution || [0, 0, 0, 0, 0],
+                        data: analyticsData.ilrDistribution || [0, 0, 0, 0],
                         backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'],
                         borderWidth: 2,
-                        borderColor: '#ffffff'
+                        borderColor: '#18181b'
                     }]
                 },
                 options: {
@@ -299,8 +291,16 @@ async function createCharts(analyticsData) {
                             position: 'bottom',
                             labels: {
                                 padding: 20,
-                                usePointStyle: true
+                                usePointStyle: true,
+                                color: '#e2e8f0'
                             }
+                        },
+                        tooltip: {
+                            backgroundColor: '#0a0a0a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e2e8f0',
+                            borderColor: '#27272a',
+                            borderWidth: 1
                         }
                     },
                     animation: {
@@ -310,7 +310,7 @@ async function createCharts(analyticsData) {
             });
         }
 
-       
+        // Create Language Distribution Chart
         const langCanvas = document.getElementById('languageChart');
         if (langCanvas && analyticsData.languages && analyticsData.languages.length > 0) {
             const langCtx = langCanvas.getContext('2d');
@@ -321,10 +321,10 @@ async function createCharts(analyticsData) {
                     datasets: [{
                         label: 'Analyses',
                         data: analyticsData.languageCounts || [],
-                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
-                        borderColor: 'rgba(102, 126, 234, 1)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        borderColor: 'rgba(255, 255, 255, 1)',
                         borderWidth: 2,
-                        borderRadius: 8,
+                        borderRadius: 4,
                         borderSkipped: false
                     }]
                 },
@@ -334,18 +334,33 @@ async function createCharts(analyticsData) {
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#0a0a0a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e2e8f0',
+                            borderColor: '#27272a',
+                            borderWidth: 1
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                stepSize: 1
+                                stepSize: 1,
+                                color: '#a1a1aa'
+                            },
+                            grid: {
+                                color: '#27272a'
                             }
                         },
                         x: {
                             ticks: {
-                                maxRotation: 45
+                                maxRotation: 45,
+                                color: '#a1a1aa'
+                            },
+                            grid: {
+                                color: '#27272a'
                             }
                         }
                     },
@@ -356,7 +371,7 @@ async function createCharts(analyticsData) {
             });
         }
 
-   
+        // Create Timeline Chart
         const timelineCanvas = document.getElementById('timelineChart');
         if (timelineCanvas && analyticsData.timeline) {
             const timelineCtx = timelineCanvas.getContext('2d');
@@ -367,13 +382,13 @@ async function createCharts(analyticsData) {
                     datasets: [{
                         label: 'Analyses',
                         data: analyticsData.timeline.data || [],
-                        borderColor: 'rgba(102, 126, 234, 1)',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderColor: 'rgba(255, 255, 255, 1)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
                         borderWidth: 3,
                         fill: true,
                         tension: 0.4,
-                        pointBackgroundColor: 'rgba(102, 126, 234, 1)',
-                        pointBorderColor: '#ffffff',
+                        pointBackgroundColor: 'rgba(255, 255, 255, 1)',
+                        pointBorderColor: '#0a0a0a',
                         pointBorderWidth: 2,
                         pointRadius: 6,
                         pointHoverRadius: 8
@@ -385,13 +400,32 @@ async function createCharts(analyticsData) {
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#0a0a0a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e2e8f0',
+                            borderColor: '#27272a',
+                            borderWidth: 1
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                stepSize: 1
+                                stepSize: 1,
+                                color: '#a1a1aa'
+                            },
+                            grid: {
+                                color: '#27272a'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#a1a1aa'
+                            },
+                            grid: {
+                                color: '#27272a'
                             }
                         }
                     },

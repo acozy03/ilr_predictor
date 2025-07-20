@@ -7,10 +7,9 @@
 {% block extra_head %}
 <style>
     .upload-zone {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border: 3px dashed #667eea;
-        border-radius: 24px;
+        background: #18181b;
+        border: 3px dashed #ffffff;
+        border-radius: 4px;
         padding: 60px 40px;
         text-align: center;
         margin-bottom: 32px;
@@ -19,35 +18,36 @@
     }
     
     .upload-zone:hover {
-        border-color: #764ba2;
-        background: rgba(255, 255, 255, 1);
+        border-color: #e2e8f0;
+        background: #27272a;
         transform: translateY(-2px);
     }
     
     .upload-zone.dragover {
         border-color: #22c55e;
-        background: rgba(34, 197, 94, 0.05);
+        background: rgba(34, 197, 94, 0.1);
     }
     
     .upload-icon {
         font-size: 4rem;
         margin-bottom: 16px;
         opacity: 0.6;
+        color: #a1a1aa;
     }
     
     .text-input-area {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
+        background: #18181b;
+        border: 1px solid #27272a;
+        border-radius: 4px;
         padding: 32px;
         margin-bottom: 32px;
-        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
     
     .text-item {
-        background: #f8fafc;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
+        background: #0a0a0a;
+        border: 1px solid #27272a;
+        border-radius: 4px;
         padding: 16px;
         margin-bottom: 12px;
         position: relative;
@@ -60,10 +60,15 @@
         background: transparent;
         resize: vertical;
         font-family: inherit;
+        color: #e2e8f0;
     }
     
     .text-item textarea:focus {
         outline: none;
+    }
+    
+    .text-item textarea::placeholder {
+        color: #71717a;
     }
     
     .remove-btn {
@@ -81,12 +86,12 @@
     }
     
     .batch-results {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
+        background: #18181b;
+        border: 1px solid #27272a;
+        border-radius: 4px;
         padding: 40px;
         margin-top: 32px;
-        box-shadow: 0 32px 64px rgba(0, 0, 0, 0.12);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         display: none;
     }
     
@@ -96,23 +101,24 @@
     }
     
     .result-item {
-        background: #f8fafc;
-        border-radius: 12px;
+        background: #0a0a0a;
+        border: 1px solid #27272a;
+        border-radius: 4px;
         padding: 20px;
         margin-bottom: 16px;
-        border-left: 4px solid #667eea;
+        border-left: 4px solid #ffffff;
     }
     
     .progress-bar {
-        background: #e5e7eb;
-        border-radius: 8px;
+        background: #27272a;
+        border-radius: 4px;
         height: 8px;
         margin: 16px 0;
         overflow: hidden;
     }
     
     .progress-fill {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: #ffffff;
         height: 100%;
         width: 0%;
         transition: width 0.3s ease;
@@ -129,11 +135,11 @@
     .batch-features-section {
         margin-top: 15px;
         padding-top: 15px;
-        border-top: 1px dashed #e2e8f0;
+        border-top: 1px dashed #27272a;
     }
     .batch-features-section h5 {
         font-size: 1rem;
-        color: #1f2937;
+        color: #ffffff;
         margin-bottom: 10px;
     }
     .batch-features-grid {
@@ -142,22 +148,24 @@
         gap: 10px;
     }
     .batch-feature-item {
-        background: #e0f2fe;
+        background: #18181b;
+        border: 1px solid #27272a;
         padding: 8px;
-        border-radius: 6px;
+        border-radius: 4px;
         text-align: center;
         font-size: 0.8rem;
     }
     .batch-feature-item div:first-child {
-        color: #0369a1;
+        color: #a1a1aa;
         font-weight: 500;
         margin-bottom: 2px;
     }
     .batch-feature-item div:last-child {
         font-weight: 600;
-        color: #0c4a6e;
+        color: #ffffff;
     }
 
+    /* Chart specific styles */
     .batch-chart-container {
         margin-top: 15px;
         height: 180px;
@@ -185,14 +193,15 @@
 {% block content %}
 <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
     <div class="upload-icon">📁</div>
-    <h3 style="margin-bottom: 8px; color: #1f2937;">Upload Text Files</h3>
-    <p style="color: #64748b; margin-bottom: 16px;">Drag and drop .txt files here or click to browse</p>
+    <h3 style="margin-bottom: 8px; color: #ffffff;">Upload Text Files</h3>
+    <p style="color: #a1a1aa; margin-bottom: 16px;">Drag and drop .txt files here or click to browse</p>
     <input type="file" id="fileInput" multiple accept=".txt" style="display: none;" onchange="handleFiles(this.files)">
-    <div style="font-size: 0.9rem; color: #9ca3af;">Supports: .txt files (max 10 files)</div>
+    <div style="font-size: 0.9rem; color: #71717a;">Supports: .txt files (max 10 files)</div>
 </div>
 
 <div class="text-input-area">
     <div class="section-title">
+        
         Manual Text Input
     </div>
     
@@ -214,14 +223,13 @@
 
 <div class="batch-results" id="batchResults">
     <div class="section-title">
-       
         Batch Analysis Results
     </div>
     
     <div style="margin-bottom: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span>Processing Progress</span>
-            <span id="progressText">0/0</span>
+            <span style="color: #e2e8f0;">Processing Progress</span>
+            <span id="progressText" style="color: #a1a1aa;">0/0</span>
         </div>
         <div class="progress-bar">
             <div class="progress-fill" id="progressFill"></div>
@@ -250,8 +258,9 @@
 let batchResults = [];
 let textCounter = 1;
 let isBatchAnalysisInProgress = false;
-const batchCharts = {}; 
+const batchCharts = {};
 
+// File upload handling
 const uploadZone = document.getElementById('uploadZone');
 
 uploadZone.addEventListener('dragover', (e) => {
@@ -304,7 +313,7 @@ function addTextInput(content = '', filename = '') {
     textItem.innerHTML = `
         <button class="remove-btn" onclick="removeTextInput(this)">×</button>
         <textarea placeholder="Enter text #${textCounter} for batch analysis...">${content}</textarea>
-        ${filename ? `<div style="font-size: 0.8rem; color: #64748b; margin-top: 8px;">📄 ${filename}</div>` : ''}
+        ${filename ? `<div style="font-size: 0.8rem; color: #a1a1aa; margin-top: 8px;">📄 ${filename}</div>` : ''}
     `;
     container.appendChild(textItem);
 }
@@ -353,6 +362,7 @@ async function analyzeBatch() {
     textareas.forEach(ta => ta.disabled = true);
     document.querySelectorAll('.remove-btn').forEach(btn => btn.disabled = true);
 
+    // Destroy any existing charts from previous batch run
     for (const chartId in batchCharts) {
         if (batchCharts[chartId]) {
             batchCharts[chartId].destroy();
@@ -361,7 +371,6 @@ async function analyzeBatch() {
     }
     
     try {
-   
         const response = await fetch('/predict-batch', {
             method: 'POST',
             headers: { 
@@ -401,6 +410,7 @@ async function analyzeBatch() {
                     `;
                 }
 
+                // Linguistic Features Grid
                 if (result.features && Object.keys(result.features).length > 0) {
                     const filteredFeatures = {};
                     for (const key in result.features) {
@@ -427,18 +437,18 @@ async function analyzeBatch() {
 
                 resultItem.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h4 style="color: #1f2937;">Text #${result.index + 1}</h4>
+                        <h4 style="color: #ffffff;">Text #${result.index + 1}</h4>
                         ${result.error ? 
-                            `<span style="background: #ef4444; color: white; padding: 4px 12px; border-radius: 8px; font-weight: 600;">Error</span>` :
-                            `<span style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 4px 12px; border-radius: 8px; font-weight: 600;">ILR ${result.predicted_ilr}</span>`
+                            `<span style="background: #ef4444; color: white; padding: 4px 12px; border-radius: 4px; font-weight: 600;">Error</span>` :
+                            `<span style="background: #ffffff; color: #0a0a0a; padding: 4px 12px; border-radius: 4px; font-weight: 600;">ILR ${result.predicted_ilr}</span>`
                         }
                     </div>
-                    <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
-                        <em style="color: #64748b;">${result.text.substring(0, 150)}${result.text.length > 150 ? '...' : ''}</em>
-                        ${result.original_language && result.original_language !== "en" ? `<br><span style="font-size: 0.8rem; color: #64748b;">(Original: ${result.original_language.toUpperCase()})</span>` : ''}
-                        ${result.translated_text ? `<br><span style="font-size: 0.8rem; color: #64748b;">(Translated for analysis)</span>` : ''}
+                    <div style="background: #18181b; border: 1px solid #27272a; padding: 12px; border-radius: 4px; margin-bottom: 12px;">
+                        <em style="color: #a1a1aa;">${result.text.substring(0, 150)}${result.text.length > 150 ? '...' : ''}</em>
+                        ${result.original_language && result.original_language !== "en" ? `<br><span style="font-size: 0.8rem; color: #a1a1aa;">(Original: ${result.original_language.toUpperCase()})</span>` : ''}
+                        ${result.translated_text ? `<br><span style="font-size: 0.8rem; color: #a1a1aa;">(Translated for analysis)</span>` : ''}
                     </div>
-                    ${result.error ? `<p style="color: red; font-size: 0.9rem;">Analysis failed: ${result.error}</p>` : detailHtml}
+                    ${result.error ? `<p style="color: #ef4444; font-size: 0.9rem;">Analysis failed: ${result.error}</p>` : detailHtml}
                 `;
                 resultsContainer.appendChild(resultItem);
 
@@ -460,6 +470,7 @@ async function analyzeBatch() {
 
         textareas.forEach(ta => ta.disabled = false);
         document.querySelectorAll('.remove-btn').forEach(btn => btn.disabled = false);
+        isBatchAnalysisInProgress = false;
     }
 }
 
@@ -471,7 +482,7 @@ function createBatchProbabilityBarChart(canvasId, probabilities) {
     }
     const chartCtx = ctx.getContext("2d");
 
-
+    // Destroy existing chart if it exists for this ID
     if (batchCharts[canvasId]) {
         batchCharts[canvasId].destroy();
     }
@@ -486,18 +497,18 @@ function createBatchProbabilityBarChart(canvasId, probabilities) {
                 label: "Probability",
                 data: probabilities.map(p => parseFloat((p * 100).toFixed(2))),
                 backgroundColor: [
-                    'rgba(255, 99, 132, 0.7)',
-                    'rgba(54, 162, 235, 0.7)',
-                    'rgba(255, 206, 86, 0.7)',
-                    'rgba(75, 192, 192, 0.7)',
-                    'rgba(153, 102, 255, 0.7)'
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(234, 179, 8, 0.8)',
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(168, 85, 247, 0.8)'
                 ],
                 borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)'
+                    'rgba(239, 68, 68, 1)',
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(234, 179, 8, 1)',
+                    'rgba(34, 197, 94, 1)',
+                    'rgba(168, 85, 247, 1)'
                 ],
                 borderWidth: 1
             }]
@@ -505,25 +516,14 @@ function createBatchProbabilityBarChart(canvasId, probabilities) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    title: {
-                        display: true,
-                        text: 'Probability (%)'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'ILR Level'
-                    }
-                }
-            },
             plugins: {
                 legend: { display: false },
                 tooltip: {
+                    backgroundColor: '#18181b',
+                    titleColor: '#ffffff',
+                    bodyColor: '#e2e8f0',
+                    borderColor: '#27272a',
+                    borderWidth: 1,
                     callbacks: {
                         label: function(context) {
                             let label = context.dataset.label || '';
@@ -533,12 +533,41 @@ function createBatchProbabilityBarChart(canvasId, probabilities) {
                         }
                     }
                 }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Probability (%)',
+                        color: '#e2e8f0'
+                    },
+                    ticks: {
+                        color: '#a1a1aa'
+                    },
+                    grid: {
+                        color: '#27272a'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'ILR Level',
+                        color: '#e2e8f0'
+                    },
+                    ticks: {
+                        color: '#a1a1aa'
+                    },
+                    grid: {
+                        color: '#27272a'
+                    }
+                }
             }
         }
     });
     return batchCharts[canvasId];
 }
-
 
 function exportResults(format) {
     if (batchResults.length === 0) {
@@ -549,7 +578,7 @@ function exportResults(format) {
     let content, filename, mimeType;
     
     if (format === 'csv') {
-
+        // Collect all possible feature headers (excluding probabilities for CSV simplicity)
         const allFeatureKeys = new Set();
         batchResults.forEach(item => {
             if (item.features) {
@@ -564,7 +593,7 @@ function exportResults(format) {
 
         const headers = ['Text #', 'ILR Level', 'Original Language', 'Translated Text (if any)'].concat(sortedFeatureKeys);
         
-    
+        // Add probability headers
         for(let i=0; i<5; i++) {
             headers.push(`Prob_ILR_${i}`);
         }
@@ -577,19 +606,19 @@ function exportResults(format) {
                 item.translated_text ? `"${item.translated_text.replace(/"/g, '""')}"` : ''
             ];
 
-            
+            // Add linguistic feature values
             sortedFeatureKeys.forEach(key => {
                 const value = item.features ? item.features[key] : undefined;
                 rowData.push(typeof value === 'number' ? value.toFixed(2) : (value === null ? '' : value));
             });
 
-     
+            // Add probability values
             for(let i=0; i<5; i++) {
                 const probKey = `Probabilities_ILR_${i}`;
                 const probValue = item.features ? item.features[probKey] : undefined;
                 rowData.push(typeof probValue === 'number' ? (probValue * 100).toFixed(2) : '');
             }
-            return rowData.map(col => `"${String(col).replace(/"/g, '""')}"`).join(','); 
+            return rowData.map(col => `"${String(col).replace(/"/g, '""')}"`).join(',');
         });
         
         content = [headers.map(h => `"${h}"`).join(','), ...rows].join('\n');
@@ -650,11 +679,13 @@ ${batchResults.map(item => {
     itemDetails += `**Text Preview**: ${item.text.substring(0, 200)}...\n\n`;
 
     if (!item.error) {
-     
+        // Add Probabilities if available
         let probabilitiesSection = '';
         if (item.probabilities && Array.isArray(item.probabilities) && item.probabilities.length === 5) {
             probabilitiesSection += `**Probabilities**: ${item.probabilities.map((p, idx) => `ILR ${idx}: ${(p * 100).toFixed(2)}%`).join(', ')}\n\n`;
         }
+
+        // Filter out probability features for linguistic features
         const filteredFeatures = {};
         if (item.features) {
             for (const key in item.features) {
@@ -665,12 +696,12 @@ ${batchResults.map(item => {
         }
         
         if (Object.keys(filteredFeatures).length > 0) {
-            itemDetails += probabilitiesSection; 
+            itemDetails += probabilitiesSection;
             itemDetails += `**Key Linguistic Features**:\n`;
             itemDetails += Object.entries(filteredFeatures).map(([key, value]) => 
                 `- ${key}: ${typeof value === 'number' ? value.toFixed(2) : value}`
             ).join('\n');
-        } else if (probabilitiesSection) { 
+        } else if (probabilitiesSection) {
              itemDetails += probabilitiesSection;
              itemDetails += `No detailed linguistic features available.\n`;
         } else {
